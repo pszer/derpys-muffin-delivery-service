@@ -1,11 +1,10 @@
 local clone = require 'clone'
 
 EYES_ATTRIBUTES = {
-
-	["pianko_eyes"] = {
-		eyes_filename = "models/pianko/eyes.png",
-		eyes_dimensions = {32,32},
-		eyes_radius = 12,
+	["derpy_eyes"] = {
+		eyes_filename = "models/pony/derpyeyes.png",
+		eyes_dimensions = {96,96},
+		eyes_radius = 36,
 		eyes_poses = {
 			{name="neutral"},
 			{name="close_phase1"},

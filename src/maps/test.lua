@@ -902,12 +902,12 @@ return {
 		{name="shittycrate.iqm", pos={8,1,62}},
 		{name="shittycrate.iqm", pos={1,1,62}},
 		{name="shittycrate.iqm", pos={6,3,62}},
-		{name="mapedit/nito.iqm", pos={6,3,58}},
+		{name="pony/derpy.iqm", pos={6,3,58}},
 	},
 
 	skybox = {
 		texture = "skyday01.png",
-		brightness = 1.5
+		brightness = 21.0
 	},
 
 	groups = {
@@ -927,7 +927,7 @@ return {
 		},
 		{
 			["light_pos"] = {250,-90,1500,1},
-			["light_col"] = {277.95/255, 255/255, 224/255,100},
+			["light_col"] = {277.95/255, 255/255, 224/255, 21},
 			["light_size"] = 10,
 			["light_static"] = true
 		},--]]

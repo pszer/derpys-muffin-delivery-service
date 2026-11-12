@@ -22,7 +22,9 @@ Loader = {__type = "loader",
 
 	demand_timeout = 5.0,
 
-	thread = love.thread.newThread( "threads/assetload.lua" )
+	thread = love.thread.newThread( "threads/assetload.lua" ),
+
+	silent = true
 
 }
 
@@ -86,9 +88,13 @@ function Loader:cleanupAssets(asset_table)
 					asset_table.__ref_counts[name] = nil
 					asset[release_func]( asset )
 
-					print(string.format("Loader:cleaupAssets(): removing %s%s", asset_table.__dir, name))
+					if not Loader.silent then
+						print(string.format("Loader:cleaupAssets(): removing %s%s", asset_table.__dir, name))
+					end
 				else
-					print(string.format("Loader:cleaupAssets(): %s%s has %d references", asset_table.__dir, name, ref_count))
+					if not Loader.silent then
+						print(string.format("Loader:cleaupAssets(): %s%s has %d references", asset_table.__dir, name, ref_count))
+					end
 				end
 			end
 		end
@@ -120,7 +126,9 @@ function Loader:deref(asset_table, filename)
 		error(string.format("Loader:deref(): %s%s has %d references, reference underflow",
 		asset_table.__dir, tostring(filename), ref_count)) end
 
-	print(string.format("Loader:deref(): %s%s refcount %d -> %d", asset_table.__dir, filename, ref_counts[filename], ref_counts[filename]-1))
+	if not Loader.silent then
+		print(string.format("Loader:deref(): %s%s refcount %d -> %d", asset_table.__dir, filename, ref_counts[filename], ref_counts[filename]-1))
+	end
 	ref_counts[filename] = ref_counts[filename] - 1
 end
 
@@ -171,10 +179,14 @@ function Loader:popRequest( demand , timeout )
 	self.requests_count = self.requests_count - 1
 
 	if not asset then
-		print(string.format("Loader: failed to load %s%s, %s", asset_table.__dir, filename or "(nil)", error_str or ""))
+		if not Loader.silent then
+			print(string.format("Loader: failed to load %s%s, %s", asset_table.__dir, filename or "(nil)", error_str or ""))
+		end
 		return true
 	else
-		print(string.format("Loader: %s%s success", asset_table.__dir, filename))
+		if not Loader.silent then
+			print(string.format("Loader: %s%s success", asset_table.__dir, filename))
+		end
 	end
 
 	asset_table[filename] = self:finaliseAsset( asset_type , filename , asset )
@@ -214,7 +226,9 @@ function Loader:openAsset(type, filename)
 	local base_dir = assets.__dir
 	if assets[filename] then return end
 	self:sendRequest( type , base_dir , filename )
-	print(string.format("Loader:openAsset(\"%s\",\"%s\")", type, filename))
+	if not Loader.silent then
+		print(string.format("Loader:openAsset(\"%s\",\"%s\")", type, filename))
+	end
 end
 
 

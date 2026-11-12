@@ -1,9 +1,9 @@
 local CUSTOM_MODELS = {
-	["pianko_model"] = {
-		["model_name"] = "pianko/pianko.iqm",
-		["model_face"] = "pianko_face",
+	["derpy_model"] = {
+		["model_name"] = "pony/derpy.iqm",
+		["model_face"] = "derpy_face",
 		["model_contour"] = true,
-		["model_contour_colour"] = {0.0,0.0,0.0,1.0},
+		["model_contour_colour"] = {0.56,0.56,0.67,1.0},
 		["model_rimlight"] = CONSTS.RIMLIGHT,
 	}
 }

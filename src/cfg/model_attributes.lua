@@ -5,8 +5,15 @@ local MODEL_ATTRIBUTES = {
 	},
 
 	["pianko/piankofacemesh.iqm"] = {
-		--["model_texture_fname"]  = "nil.png",
 		["model_vertex_winding"] = "ccw"
+	},
+
+	["pony/derpy.iqm"] = {
+		["model_texture_fname"]  = "models/pony/derpy.png",
+		["model_vertex_winding"] = "cw"
+	},
+	["pony/derpyfacemesh.iqm"] = {
+		["model_vertex_winding"] = "cw"
 	},
 
 	["Sphere.iqm"] = {

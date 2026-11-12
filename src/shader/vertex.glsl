@@ -59,7 +59,7 @@ attribute vec2 TextureScale;
 attribute vec2 TextureOffset;
 attribute float TextureUvIndex;
 
-uniform mat4 u_bone_matrices[48];
+uniform mat4 u_bone_matrices[52];
 uniform int  u_skinning;
 
 uniform float u_contour_outline_offset;

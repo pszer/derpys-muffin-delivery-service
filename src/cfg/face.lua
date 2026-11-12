@@ -2,25 +2,28 @@ local clone = require 'clone'
 
 FACE_ATTRIBUTES = {
 
-	["pianko_face"] = {
-		animface_eyesdata_name = "pianko_eyes",
-		animface_features = {
-			{
-				name="pianko_mouth",
-				pose = "neutral",
-				position = {32,83},
-				mirror   = false,
-			}
-		},
-		animface_texture_dim   = {128,128},
-		animface_righteye_position = {18,46},
-		animface_lefteye_position  = {78,46},
+	["derpy_face"] = {
+		animface_eyesdata_name = "derpy_eyes",
+		animface_features = {},
+		animface_texture_dim   = {300,300},
+		animface_righteye_position = {48,57},
+		animface_lefteye_position  = {152,57},
 		animface_righteye_pose     = "neutral",
 		animface_lefteye_pose      = "neutral",
-		animface_righteye_dir      = clone{0,0,12},
-		animface_lefteye_dir       = clone{0,0,12},
+		animface_righteye_dir      = clone{0,0,36},
+		animface_lefteye_dir       = clone{0,0,36},
 
 		animface_anims = {
+			['reference'] = {
+				loop = true,
+				length = 1,
+				-- keyframes
+				{0  , animface_righteye_pose="neutral"     , animface_lefteye_pose="neutral"     ,
+				      animface_righteye_dir ={ 0,0,36}, animface_lefteye_dir = { 0,0,36}},
+				{1  , animface_righteye_pose="neutral"     , animface_lefteye_pose="neutral"     ,
+				      animface_righteye_dir ={ 0,0,36}, animface_lefteye_dir = { 0,0,36}},
+
+			},
 
 			["neutral"] = {
 
@@ -29,13 +32,11 @@ FACE_ATTRIBUTES = {
 
 				-- keyframes
 				{0  , animface_righteye_pose="neutral"     , animface_lefteye_pose="neutral"     ,
-				      animface_righteye_dir ={ 0,0,12}, animface_lefteye_dir = { 0,0,12},
-							mouth_pose="neutral"},
+				      animface_righteye_dir ={ 0,0,36}, animface_lefteye_dir = { 0,0,36}},
 				{80  , animface_righteye_pose="neutral"     , animface_lefteye_pose="neutral"     ,
-				      animface_righteye_dir ={ 0,0,12}, animface_lefteye_dir = { 0,0,12}},
+				      animface_righteye_dir ={ 0,0,36}, animface_lefteye_dir = { 0,0,36}},
 				{89  , animface_righteye_pose="neutral"     , animface_lefteye_pose="neutral"     ,
-				      animface_righteye_dir ={ 1.7,0,12}, animface_lefteye_dir = { 1.5,0,12},
-							mouth_pose = "slight"},
+				      animface_righteye_dir ={ 5.1,0,36}    , animface_lefteye_dir = { 4.5,0,36}},
 
 				{90+0 , animface_righteye_pose="close_phase1", animface_lefteye_pose="close_phase1",},
 				{90+2 , animface_righteye_pose="close_phase2", animface_lefteye_pose="close_phase2",},
@@ -45,14 +46,13 @@ FACE_ATTRIBUTES = {
 				{90+10, animface_righteye_pose="neutral"     , animface_lefteye_pose="neutral"     ,},
 
 				{140  , animface_righteye_pose="neutral"     , animface_lefteye_pose="neutral"     ,
-				      animface_righteye_dir ={ 1.5,0,12}, animface_lefteye_dir = { 1.5,0,12}},
+				      animface_righteye_dir ={ 4.5,0,36}, animface_lefteye_dir = { 4.5,0,36}},
 				{150  , animface_righteye_pose="neutral"     , animface_lefteye_pose="neutral"     ,
-				      animface_righteye_dir ={ -1,1,12}, animface_lefteye_dir = { -1,1,12}},
+				      animface_righteye_dir ={ -3,3,36}, animface_lefteye_dir = { -3,3,36}},
 				{240  , animface_righteye_pose="neutral"     , animface_lefteye_pose="neutral"     ,
-				      animface_righteye_dir ={ -1,1,12}, animface_lefteye_dir = { -1,1,12},
-							mouth_pose="neutral"},
+				      animface_righteye_dir ={ -3,3,36}, animface_lefteye_dir = { -3,3,36},},
 				{249  , animface_righteye_pose="neutral"     , animface_lefteye_pose="neutral"     ,
-				      animface_righteye_dir ={ 0,0,12}, animface_lefteye_dir = { 0,0,12}},
+				      animface_righteye_dir ={ 0,0,36}, animface_lefteye_dir = { 0,0,36}},
 
 				{250+0 , animface_righteye_pose="close_phase1", animface_lefteye_pose="close_phase1",},
 				{250+2 , animface_righteye_pose="close_phase2", animface_lefteye_pose="close_phase2",},
@@ -62,9 +62,9 @@ FACE_ATTRIBUTES = {
 				{250+10, animface_righteye_pose="neutral"     , animface_lefteye_pose="neutral"     ,},
 
 				{290  , animface_righteye_pose="neutral"     , animface_lefteye_pose="neutral"     ,
-				      animface_righteye_dir ={  0,0,12}, animface_lefteye_dir = {  0,0,12}},
+				      animface_righteye_dir ={  0,0,36}, animface_lefteye_dir = {  0,0,36}},
 				{300  , animface_righteye_pose="neutral"     , animface_lefteye_pose="neutral"     ,
-				      animface_righteye_dir ={ -1,0,12}, animface_lefteye_dir = { -1,0,12},},
+				      animface_righteye_dir ={ -3,0,36}, animface_lefteye_dir = { -3,0,36},},
 
 				{420+0 , animface_righteye_pose="close_phase1", animface_lefteye_pose="close_phase1",},
 				{420+2 , animface_righteye_pose="close_phase2", animface_lefteye_pose="close_phase2",},
@@ -80,9 +80,9 @@ FACE_ATTRIBUTES = {
 				{432+10, animface_righteye_pose="neutral"     , animface_lefteye_pose="neutral"     ,},
 
 				{450  , animface_righteye_pose="neutral"     , animface_lefteye_pose="neutral"     ,
-				      animface_righteye_dir ={ -1,0,12}, animface_lefteye_dir = { -1,0,12}},
+				      animface_righteye_dir ={ -3,0,36}, animface_lefteye_dir = { -3,0,36}},
 				{460  , animface_righteye_pose="neutral"     , animface_lefteye_pose="neutral"     ,
-				      animface_righteye_dir ={ 0,0,12}, animface_lefteye_dir = { 0,0,12}},
+				      animface_righteye_dir ={ 0,0,36}, animface_lefteye_dir = { 0,0,36}},
 
 				{500+0 , animface_righteye_pose="close_phase1", animface_lefteye_pose="close_phase1"},
 				{500+2 , animface_righteye_pose="close_phase2", animface_lefteye_pose="close_phase2",},
@@ -97,7 +97,7 @@ FACE_ATTRIBUTES = {
 				{600+6 , animface_righteye_pose="close_phase2" , animface_lefteye_pose="close_phase2" ,},
 				{600+10, animface_righteye_pose="close_phase1", animface_lefteye_pose="close_phase1",},
 				{600+12, animface_righteye_pose="neutral"     , animface_lefteye_pose="neutral"     ,
-				      animface_righteye_dir ={ 0,0,12}, animface_lefteye_dir = { 0,0,12}},
+				      animface_righteye_dir ={ 0,0,36}, animface_lefteye_dir = { 0,0,36}},
 
 			}
 		}
@@ -105,9 +105,9 @@ FACE_ATTRIBUTES = {
 }
 
 FACE_DECOR_ATTRIBUTES = {
-	["pianko_face"] = {
+	["derpy_face"] = {
 		decor_name = "face",
-		decor_model_name = "pianko/piankofacemesh.iqm",
+		decor_model_name = "pony/derpyfacemesh.iqm",
 		decor_parent_bone = "Head",
 		decor_position = {0,0,0.015},
 		decor_shadow_mult = 1.00

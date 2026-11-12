@@ -70,13 +70,11 @@ local StateWalkingPrototype = EntityStatePropPrototype:extend{
 	{"state_enter" , nil, function(GameData)
 		return function(ent,state)
 			state.state_animator = ent.props.ent_model:pushNewAnimator()
+
 			state.state_animator.anim1:playAnimationByName("Walk",0.0,1.0,true)
 			state.state_animator.anim2:playAnimationByName("Stand",0.0,0.75,true)
 			state.state_animator:setInterp(0.0)
 
-			--[[local walk_anim  = {"Walk", 0.0, 1.0, true}
-			local stand_anim = {"Stand", 0.0, 0.75, true}
-			ent:playAnimationInterp(walk_anim, stand_anim, 0.0)--]]
 		end
 	end },
 	{"state_exit"  , nil, function(GameData)
@@ -85,7 +83,7 @@ local StateWalkingPrototype = EntityStatePropPrototype:extend{
 		end
 	end },
 
-	{"state_walking_speed", "number", 250, nil,  "max walk speed, stated in world units per second"},
+	{"state_walking_speed", "number", 195, nil,  "max walk speed, stated in world units per second"},
 	{"state_walking_accel", "number", 480*2.5, nil ,  "walk speed acceleration, stated in world units per second"},
 	{"state_walking_anim_speed", "number", 3*1.25, nil,  "scalar for walk speed animation"},
 

@@ -12,6 +12,7 @@ FACIAL_FEATURES_ATTRIBUTES = {
 			"slight",
 	  }
 	 }
+
 }
 
 return FACIAL_FEATURES_ATTRIBUTES
