@@ -18,12 +18,13 @@ end
 function CustomModel:load(props)
 	local model_name = props.model_name
 	local model_face = props.model_face
-	local model_contour = props.model_contour
+	local model_outline = props.model_outline
+	local model_outline_scale = props.model_outline_scale
 	local model_rimlight = props.model_rimlight
 
-	local model_contour_colour = props.model_contour_colour
-	if model_contour_colour then
-		model_contour_colour = {unpack(model_contour_colour)}
+	local model_outline_colour = props.model_outline_colour
+	if model_outline_colour then
+		model_outline_colour = {unpack(model_outline_colour)}
 	end
 
 	local model_ref = Models.loadModel(model_name)
@@ -36,9 +37,9 @@ function CustomModel:load(props)
 
 	local inst = ModelInstance:newInstance(model_ref,
 	{
-		["model_i_outline_flag"] = model_contour,
-		["model_i_contour_flag"] = model_contour,
-		["model_i_outline_colour"] = model_contour_colour,
+		["model_i_outline_flag"] = model_outline,
+		["model_i_outline_scale"] = model_outline_scale,
+		["model_i_outline_colour"] = model_outline_colour,
 		["model_i_rimlight"] = model_rimlight
 	})
 

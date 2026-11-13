@@ -57,17 +57,23 @@ function Camera:getRotation()
 	return self.props.cam_rotation end
 function Camera:getDirection()
 	return self.props.cam_direction end
+function Camera:getQuaternion()
+	return self.props.cam_quaternion end
 
 function Camera:directionMode()
 	self.props.cam_mode = "direction" end
 function Camera:rotationMode()
 	self.props.cam_mode = "rotation" end
+function Camera:quaternionMode()
+	self.props.cam_mode = "quaternion" end
 function Camera:getMode()
 	return self.props.cam_mode end
 function Camera:isDirectionMode()
 	return self:getMode() == "direction" end
 function Camera:isRotationMode()
 	return self:getMode() == "rotation" end
+function Camera:isQuaternionMode()
+	return self:getMode() == "quaternion" end
 
 function Camera:setPosition(pos)
 	--self.props.cam_position = {pos[1], pos[2], pos[3]}
@@ -91,6 +97,24 @@ end
 function Camera:setRotation(rot)
 	self.props.cam_rotation = {rot[1], rot[2], rot[3]}
 	self:rotationMode()
+end
+function Camera:setQuaternion(rot)
+	self.props.cam_quaternion = {rot[1], rot[2], rot[3], rot[4]}
+	self:quaternionMode()
+end
+local __tempquat1 = cpml.quat.new()
+local __tempquat2 = cpml.quat.new()
+function Camera:setQuaternionInterp(rot, interp)
+	local props = self.props
+	__tempquat1.x,__tempquat1.y,__tempquat1.z,__tempquat1.w =
+		props.cam_quaternion[1],props.cam_quaternion[2],props.cam_quaternion[3],props.cam_quaternion[4]
+	__tempquat2.x,__tempquat2.y,__tempquat2.z,__tempquat2.w =
+		rot[1],rot[2],rot[3],rot[4]
+
+	local result_quat = cpml.quat.slerp(__tempquat1, __tempquat2, interp)
+
+	self.props.cam_rotation = {result_quat.x, result_quat.y, result_quat.z, result_quat.w}
+	self:quaternionMode()
 end
 
 -- generates and returns perspective matrix
@@ -125,6 +149,7 @@ end
 local __tempvec3 = cpml.vec3.new()
 local __tempvec3nil = cpml.vec3.new(0,0,0)
 local __tempvec3up = cpml.vec3.new(0,1,0)
+local __tempquat   = cpml.quat.new()
 function Camera:generateViewMatrix()
 	local props = self.props
 	local mat4 = cpml.mat4
@@ -154,7 +179,7 @@ function Camera:generateViewMatrix()
 		v:rotate(v, R[1], vec3.unit_x)
 		v:rotate(v, R[2], vec3.unit_y)
 		v:rotate(v, R[3], vec3.unit_z)
-	else
+	elseif mode == "direction" then
 		local D = self:getDirection()
 		__tempvec3.x = D[1]
 		__tempvec3.y = D[2]
@@ -162,6 +187,14 @@ function Camera:generateViewMatrix()
 		v:look_at(__tempvec3nil,         -- eye
 		          __tempvec3, -- look at
 				  __tempvec3up)       -- up dir
+	else
+		local cQ = self:getQuaternion()
+		__tempquat.x = cQ[1]
+		__tempquat.y = cQ[2]
+		__tempquat.z = cQ[3]
+		__tempquat.w = cQ[4]
+		local Q = cpml.mat4.from_quaternion(cQ)
+		v:mul(v,Q)
 	end
 
 	props.cam_view_matrix = m

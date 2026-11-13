@@ -52,7 +52,7 @@ MAPEDIT_KEY_SETTINGS = {
 	["cam_backward"] = { "s"      , nil    , default = "s"     },
 	["cam_up"]       = { "up"     , "space", default = "up"    },
 	["cam_down"]     = { "down"   , nil    , default = "down"  },
-	["cam_rotate"]   = { "mouse3" , nil    , default = "mouse3" },
+	["cam_rotate"]   = { "mouse4" , nil    , default = "mouse3" },
 	["cam_reset"]    = { "kp0"    , "home" , default = "kp0"   },
 	["cam_centre"]   = { "kp."    , "home" , default = "kp."   },
 	["cam_zoom_in"]  = { "wheeldown", nil   , default = "wheeldown"},

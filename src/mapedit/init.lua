@@ -50,6 +50,8 @@ ProvMapEdit = {
 	active_selection = {},
 	highlight_mesh = nil,
 
+	debug_sight_ray_mesh = nil,
+
 	active_transform = nil,
 	active_transform_tile_mat_a = nil,
 	active_transform_model_mat_a = nil,
@@ -137,15 +139,16 @@ end
 
 function ProvMapEdit:loadNito()
 	self.nito_model = Model:fromLoader("mapedit/nito.iqm")
-	self.nito = ModelInstance:newInstance(self.nito_model,{["model_i_contour_flag"]=true,["model_i_static"]=false})
+	self.nito = ModelInstance:newInstance(self.nito_model,{["model_i_outline_flag"]=true,["model_i_static"]=false})
 	local a1 = self.nito:getAnimator()
 	self.nito.props.model_i_animator_interp=0.0
 
 	self.nito_anim_push = a1:getAnimationByName("Push")
 	self.nito_anim_paint = a1:getAnimationByName("Painting")
+	self.nito_animator = self.nito:pushNewAnimator()
 
-	a1:playAnimationByName("Push")
-	a1:stopAnimation()
+	self.nito_animator.anim1:playAnimationByName("Push",0.0,1.0,true)
+	self.nito_animator.anim1:stopAnimation()
 end
 
 function ProvMapEdit:unload()
@@ -1885,14 +1888,19 @@ function ProvMapEdit:objectAtCursor(x, y, tests)
 	local cam = self.props.mapedit_cam
 	local viewproj = cam:getViewProjMatrix()
 	local vw,vh = love.window.getMode()
-	local viewport_xywh = {0,0,vw,vh}
+	local _x, _y, _w, _h = Renderer.getScaledOutputXYWH()
+	--local viewport_xywh = {0,0,vw,vh}
+	local viewport_xywh = {0,0,_w,_h}
+	local hpad = (vw-_w)/2.0
+	local vpad = (vh-_h)/2.0
 
-	local cursor_v = cpml.vec3.new(x,y,1)
-	local cursor_v2 = cpml.vec3.new(x,y,-1)
+	local cursor_v = cpml.vec3.new ( x - hpad , y - vpad ,  1)
+	local cursor_v2 = cpml.vec3.new( x - hpad , y - vpad , -1)
+	
 	local cam_pos = cpml.vec3.new(cam:getPosition())
 	local unproject_v = unproject(cursor_v, viewproj, viewport_xywh)
-	--local ray_dir_v = cpml.vec3.new(cam:getDirection())
 	local ray = {position=cam_pos, direction=cpml.vec3.normalize(unproject_v - cam_pos)}
+	--self:createRayDebugVisual(ray.position, ray.direction)
 
 	local min_dist = 1/0
 	local mesh_test = nil
@@ -1945,7 +1953,6 @@ function ProvMapEdit:objectAtCursor(x, y, tests)
 		local s = decal.box_size
 		local intersect, dist = self:testBoxAgainstRay(ray, p[1],p[2],p[3],s[1],s[2],s[3])
 		if intersect and dist-16 < min_dist then
-			print("mad")
 			mesh_test = {"decal", decal}
 			min_dist = dist
 		end
@@ -1955,7 +1962,6 @@ function ProvMapEdit:objectAtCursor(x, y, tests)
 	local grid_size = 4
 	local region_tests = __tempregiontests
 	local g_w,g_h
-	print("")
 	if test_tiles or test_walls or test_all then
 		local ceil = math.ceil
 		local w,h = self.props.mapedit_map_width, self.props.mapedit_map_height
@@ -1964,7 +1970,7 @@ function ProvMapEdit:objectAtCursor(x, y, tests)
 		for z=1,g_h do
 			for x=1,g_w do
 				local X,Z = (x-1.5)*TILE_SIZE*(grid_size), (z-1.5)*TILE_SIZE*(grid_size)
-				local W   = TILE_SIZE*(grid_size+2.5)
+				local W   = TILE_SIZE*(grid_size+3.0)
 				local D=W
 				local Y = -5000
 				local H = 10000
@@ -3626,7 +3632,7 @@ function ProvMapEdit:getTileTransformationMatrix(transform)
 	end
 
 	local getScaleByDist = self.__getScaleByDist
-	local g_scale=math.abs(TILE_HEIGHT*0.5)
+	local g_scale=math.abs(TILE_HEIGHT*2.0)
 	local int = math.floor
 	local function granulate(v)
 		if not self.granulate_transform then return v end
@@ -4420,6 +4426,10 @@ function ProvMapEdit:drawViewport()
 	self:drawSelectedHighlight()
 	love.graphics.setDepthMode( "less", true  )
 
+	if self.debug_sight_ray_mesh then
+		love.graphics.draw(self.debug_sight_ray_mesh)
+	end
+
 	love.graphics.setStencilTest()
 	shadersend(shader,"u_solid_colour_enable", false) 
 	self:drawModelsInViewport(shader)
@@ -4474,7 +4484,7 @@ end
 function ProvMapEdit:updateNitori(dt)
 	self.nito_draw = false
 	local nito = self.nito
-	local a1,a2 = nito:getAnimator()
+	local a1,a2 = self.nito_animator.anim1, self.nito_animator.anim2
 	if self.props.mapedit_mode == "transform" then
 		--local tile,walls,models = self:getObjectTypesInSelection()
 		--local exists = self:getObjectTypesInSelection()
@@ -4503,12 +4513,10 @@ function ProvMapEdit:updateNitori(dt)
 		if z_dist >= x_dist then
 			pos = {max[1],  max[2]-2.5+y_off, (min[3]+max[3])*0.5}
 			dir = {-1,0,0,"dir"}
-			local a1 = nito:getAnimator()
 			a1:setTime((-pos[1]-pos[3]*0.3)*1.4)
 		else
 			pos = {(max[1]+min[1])*0.5,  max[2]-2.5+y_off, min[3]}
 			dir = {0,0,1,"dir"}
-			local a1 = nito:getAnimator()
 			a1:setTime((-pos[3]-pos[1]*0.3)*1.4)
 		end
 
@@ -5061,4 +5069,58 @@ end
 
 function ProvMapEdit:textinput(t)
 	gui:textinput(t)
+end
+
+function ProvMapEdit:createRayDebugVisual(pos, dir)
+	local perp = cpml.vec3.perpendicular(dir)
+	perp = perp:normalize()
+
+	local circ_points = {}
+	local mesh_format = {
+	  {"VertexPosition", "float", 3},
+	  {"VertexTexCoord", "float", 2},
+	  {"VertexNormal"  , "float", 3},
+	}
+
+	for i = 0,math.pi*2,math.pi/4 do
+		table.insert(circ_points, cpml.vec3.rotate(perp, i, dir))
+	end
+
+	local vert_count = 0
+	local verts      = {}
+	local vert_map   = {}
+
+	local offset = dir * 2000.0
+
+	for i=1,#circ_points do
+		local j=i+1
+		if j==#circ_points+1 then j=1 end -- wrap around
+
+		local A = circ_points[i]
+		local B = circ_points[j]
+
+		local v1,v2,v3,v4 =
+			pos + A,
+			pos + A + offset,
+			pos + B,
+			pos + B + offset
+
+		table.insert(verts, {v1.x,v1.y,v1.z})
+		table.insert(verts, {v2.x,v2.y,v2.z})
+		table.insert(verts, {v3.x,v3.y,v3.z})
+		table.insert(verts, {v4.x,v4.y,v4.z})
+
+		table.insert(vert_map, vert_count + 1)
+		table.insert(vert_map, vert_count + 2)
+		table.insert(vert_map, vert_count + 3)
+		table.insert(vert_map, vert_count + 3)
+		table.insert(vert_map, vert_count + 2)
+		table.insert(vert_map, vert_count + 4)
+
+		vert_count = vert_count+4
+
+	end
+
+	local mesh = love.graphics.newMesh(mesh_format, verts, "triangles", "dynamic")
+	self.debug_sight_ray_mesh = mesh
 end

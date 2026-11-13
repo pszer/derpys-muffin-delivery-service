@@ -569,6 +569,7 @@ function ModelInstance:setRotation(rot)
 	end
 end
 ModelInstance.setDirection = ModelInstance.setRotation
+ModelInstance.setQuaternion = ModelInstance.setQuaternion
 function ModelInstance:setScale(scale)
 	local s = self.props.model_i_scale
 	if scale[1]~=s[1] or scale[2]~=s[2] or scale[3]~=s[3] then
@@ -704,9 +705,9 @@ function ModelInstance:sendToShader(shader, animate)
 	shadersend(shader, "u_model", "column", matrix(model_u))
 	shadersend(shader, "u_normal_model", "column", matrix(normal_u))
 
-	prof.push("model_send_bone_matricessssss")
+	prof.push("model_send_bone_matrices")
 	self:sendBoneMatrices(shader)
-	prof.pop("model_send_bone_matricessssss")
+	prof.pop("model_send_bone_matrices")
 end
 
 function ModelInstance:draw(shader, is_main_pass)
@@ -759,7 +760,7 @@ function ModelInstance:drawOutlined(shader)
 	local mesh = model:getMesh()
 
 	prof.push("contour_draw")
-	if self.props.model_i_contour_flag and gfxSetting("enable_contour") then
+	if self.props.model_i_outline_flag and gfxSetting("enable_contour") then
 		self:drawContour(shader)
 	end
 	prof.pop("contour_draw")
@@ -769,13 +770,13 @@ function ModelInstance:drawOutlined(shader)
 end
 
 function ModelInstance:drawContour(shader)
-	if not (self.props.model_i_contour_flag and gfxSetting("enable_contour")) then return end
+	if not (self.props.model_i_outline_flag and gfxSetting("enable_contour")) then return end
 
 	local shader = shader or love.graphics.getShader()
 	local model = self:getModel()
 	--local mesh = model:getMesh()
 	local colour = self.props.model_i_outline_colour
-	local offset = 0.15
+	local offset = self.props.model_i_outline_scale
 
 	--love.graphics.setFrontFaceWinding(model.props.model_vertex_winding)
 	love.graphics.setMeshCullMode("back")

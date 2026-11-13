@@ -41,26 +41,32 @@ function nonNilDirection(vec)
 	return vec
 end
 
+--
+-- Rot is either an euler rotation x,y,z,'rot'
+-- a direction vector x,y,z,'dir'
+-- or a quaterion x,y,z,w
+--
+--
+--
 local cpml = require 'cpml'
 local __tempvec3 = cpml.vec3.new()
 local __tempvec3nil = cpml.vec3.new(0,0,0)
 local __tempvec3up = cpml.vec3.new(0,1,0)
 local __mat4temp = cpml.mat4.new()
+local __quattemp = cpml.quat.new()
 function rotateMatrix(mat, rot)
 	if rot[4] == "rot" then
 		mat:rotate(mat, rot[1], cpml.vec3.unit_x)
 		mat:rotate(mat, rot[2], cpml.vec3.unit_y)
 		mat:rotate(mat, rot[3], cpml.vec3.unit_z)
 		return mat
-	else
+	elseif rot[4] == "dir" then
 		local rot = nonNilDirection(rot)
 
 		__tempvec3.x = rot[1]
 		__tempvec3.y = -rot[2]
 		__tempvec3.z = -rot[3]
 
-		--local vec3 = cpml.vec3.new
-		--local look = cpml.mat4.new(1)
 		local look = cpml.mat4.look_at(
 			__mat4temp,
 			__tempvec3nil,
@@ -70,6 +76,11 @@ function rotateMatrix(mat, rot)
 
 		cpml.mat4.mul(mat, look, mat)
 		return mat
+	elseif type(rot[4]) == "number" then
+		__quattemp.x = rot[1]
+		__quattemp.y = rot[2]
+		__quattemp.z = rot[3]
+		__quattemp.w = rot[4]
 	end
 end
 

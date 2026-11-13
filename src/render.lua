@@ -34,7 +34,7 @@ Renderer = {
 	scene_dt_exposure_buffer = nil,
 
 	bloom_renderer = nil,
-	bloom_strength = 0.08,
+	bloom_strength = 0.045,
 
 	viewport_w = 1000,
 	viewport_h = 1000,
@@ -171,6 +171,20 @@ function Renderer.setupSkyboxModel()
 	Renderer.skybox_model:setVertexMap(indices)
 end
 
+function Renderer.getScaledOutputXYWH()
+	local w,h = get_resolution()
+	local W,H = love.graphics.getWidth() / RESOLUTION_RATIO, love.graphics.getHeight() / RESOLUTION_RATIO
+	local wpad, hpad = 0,0
+
+	if RESOLUTION_PADW then
+		wpad = (W-w)/2
+	else
+		hpad = (H-h)/2
+	end
+
+	return wpad,hpad,w*RESOLUTION_RATIO,h*RESOLUTION_RATIO
+end
+
 function Renderer.renderScaled(canvas, hdr)
 	local canvas = canvas or Renderer.scene_viewport
 	local hdr = hdr or {}
@@ -179,10 +193,6 @@ function Renderer.renderScaled(canvas, hdr)
 	local exposure_max   = hdr.exposure_max or Renderer.hdr_exposure_max
 	local exposure_nudge = hdr.exposure_nudge or Renderer.hdr_exposure_nudge
 	local gamma_value    = hdr.gamma or Renderer.gamma_value
-
-	--love.graphics.setCanvas()
-	--love.graphics.origin()
-	--love.graphics.scale(RESOLUTION_RATIO)
 
 	local w,h = get_resolution()
 	local W,H = love.graphics.getWidth() / RESOLUTION_RATIO, love.graphics.getHeight() / RESOLUTION_RATIO

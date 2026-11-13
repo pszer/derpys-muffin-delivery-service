@@ -14,9 +14,10 @@ CameraPropPrototype = Props:prototype{
 	--{"cam_z", "number", -16, nil, "camera z position" }, -- done
 	{"cam_position", "table", nil, PropDefaultTable{0,0,0},  "camera position" }, -- done
 
-	{"cam_mode", "string", "rotation", PropIsOneOf{"rotation","direction"}, "whether the camera is using a rotation or a direction vector"},
-	{"cam_rotation", "table", nil, PropDefaultTable{0,0,0},  "camera rotation" }, -- done
-	{"cam_direction", "table", nil, PropDefaultTable{0,0,-1}, "camera direction"},
+	{"cam_mode", "string", "rotation", PropIsOneOf{"rotation","direction","quaternion"}, "whether the camera is using a rotation or direction vector, or quaternion."},
+	{"cam_rotation"  , "table", nil, PropDefaultTable{0,0,0}  ,  "camera rotation" }, -- done
+	{"cam_direction" , "table", nil, PropDefaultTable{0,0,-1} , "camera direction"},
+	{"cam_quaternion", "table", nil, PropDefaultTable{0,0,0,1}, "camera quaternion"},
 
 	--{"cam_yaw",   "number", 0, nil, "camera yaw angle" }, -- done
 	--{"cam_pitch", "number", -0.95, nil, "camera pitch angle" }, -- done
