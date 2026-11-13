@@ -53,8 +53,12 @@ function MapMesh:new(args)
 
 		simple_mesh = nil,
 
+		width  = nil,
+		height = nil,
+
 		tile_vert_map = nil,
 		wall_vert_map = nil,
+		tile_shapes   = nil,
 
 		wall_exists = nil,
 

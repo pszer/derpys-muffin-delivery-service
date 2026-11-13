@@ -1902,7 +1902,7 @@ function ProvMapEdit:objectAtCursor(x, y, tests)
 	local cam_pos = cpml.vec3.new(cam:getPosition())
 	local unproject_v = unproject(cursor_v, viewproj, viewport_xywh)
 	local ray = {position=cam_pos, direction=cpml.vec3.normalize(unproject_v - cam_pos)}
-	--self:createRayDebugVisual(ray.position, ray.direction)
+	self:createRayDebugVisual(ray.position, ray.direction)
 
 	local min_dist = 1/0
 	local mesh_test = nil
@@ -5090,6 +5090,8 @@ end
 function ProvMapEdit:createRayDebugVisual(pos, dir)
 	local perp = cpml.vec3.perpendicular(dir)
 	perp = perp:normalize()
+
+	print(pos, dir)
 
 	local circ_points = {}
 	local mesh_format = {

@@ -5,9 +5,9 @@ ScenePropPrototype = Props:prototype{
 	-- prop      prop     prop default    prop input     prop      read
 	-- name      type        value        validation     info      only
 
-	{"scene_grid", nil, nil, nil, "scene tile grid"},
-	{"scene_walls", nil, nil, nil, "scene walls"},
-	{"scene_wall_tiles", nil, nil, nil, "scene wall tiles"},
+	--{"scene_grid", nil, nil, nil, "scene tile grid"},
+	--{"scene_walls", nil, nil, nil, "scene walls"},
+	--{"scene_wall_tiles", nil, nil, nil, "scene wall tiles"},
 
 	{"scene_camera", nil, Camera:new(), nil, "scenes camera"},
 

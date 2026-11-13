@@ -15,6 +15,7 @@ require "facedecor"
 require "gameinterface"
 require "partition"
 require "assetloader"
+require "grid"
 
 local camcontrol = require "cameracontrollers"
 
@@ -129,6 +130,18 @@ end
 function Prov:loadMap(map)
 	self.map = map
 	self.scene:loadMap(map)
+	self.grid = Grid:gridFromMesh(self.scene.map_mesh)
+
+	--[[ Debug gridFromMesh
+	--local function Vec3(v)
+		return string.format("(%s,%s,%s)", v[1] or '',v[2] or '',v[3] or '')
+	end
+	for z,Z in ipairs(self.grid.tiles) do
+		for x,X in ipairs(Z) do
+			local tri1 = X[3] or { {},{},{} }
+			print(x.." "..z, Vec3(tri1[1]), Vec3(tri1[2]), Vec3(tri1[3]) )
+		end
+	end--]]
 end
 
 function Prov:update(dt)

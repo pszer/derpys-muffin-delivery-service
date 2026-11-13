@@ -90,7 +90,7 @@ local StateWalkingPrototype = EntityStatePropPrototype:extend{
 	{"state_walking_deaccel", "boolean", true, nil, "deaccelerates if set to true"},
 	{"state_walking_deaccel_scale", "number", -12.5, nil, "the smaller, the faster the deacceleration"},
 
-	{"state_walking_rot_speed", "number", 1.5, nil},
+	{"state_walking_rot_speed", "number", 3.5, nil},
 	{"state_walking_rot_acc", "number", 0, nil},
 	{"state_walking_dir_this_frame", "table", nil, PropDefaultTable{0,0,0}},
 

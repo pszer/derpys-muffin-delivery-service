@@ -1302,12 +1302,18 @@ function Map.generateMapMesh( map , params )
 		uvs=atlas_uvs,
 		simple_mesh=simple_mesh,
 		animated_tex_info=anim_textures_info,
+
 		tile_vert_map=tile_vert_map,
 		wall_vert_map=wall_vert_map,
+		tile_shapes  =map.tile_shape,
+
 		wall_exists=wall_exists,
 		overlay_atts=o_mesh,
 		overlay_mesh=o_full_mesh,
 		verts = verts,
+
+		width  = map.width,
+		height = map.height,
 
 		textures=textures,
 		texture_names=tex_names,
