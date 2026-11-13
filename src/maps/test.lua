@@ -907,7 +907,7 @@ return {
 
 	skybox = {
 		texture = "skyday01.png",
-		brightness = 10.0
+		brightness = 15.0
 	},
 
 	groups = {
@@ -923,7 +923,7 @@ return {
 		{
 			["light_pos"] = {0,0,0,0},
 			["light_dir"] = {-0.8,2.7,-1.5},
-			["light_col"] = {277.95/255, 277.95/255, 242/255, 15.0},
+			["light_col"] = {277.95/255, 277.95/255, 242/255, 25.0},
 			["light_static"] = true
 		},
 

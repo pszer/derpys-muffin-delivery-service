@@ -117,7 +117,7 @@ function Prov:load()
 	local cam = self.scene:getCamera()
 	cam:setController(
 		--camcontrol:followEntityFixed(theent, {0,-15,95}, {0.5,0.55,0.5}))
-		camcontrol:followEntityFixed(theent, {0,-3.05,58}, {0.5,0.49,0.5}))	
+		camcontrol:followEntityFixed(theent, {0,8.05*-2,35*2}, {0.5,0.49,0.5}))	
 
 	local derpify = require 'derpify'
 	derpify(FACE_ATTRIBUTES.derpy_face, 'neutral', 'y', -0.1)
