@@ -34,16 +34,16 @@ Renderer = {
 	scene_dt_exposure_buffer = nil,
 
 	bloom_renderer = nil,
-	bloom_strength = 0.035,
+	bloom_strength = 0.045,
 
 	viewport_w = 1000,
 	viewport_h = 1000,
 
 	enable_hdr = true,
 	hdr_exposure = 0.15,
-	hdr_exposure_min = 0.10,
+	hdr_exposure_min = 0.05,
 	hdr_exposure_max = 3.0,
-	hdr_exposure_nudge = 0.15,
+	hdr_exposure_nudge = 0.45,
 	hdr_exposure_adjust_speed = 2.5,
 
 	light_depthmap_pool = {},

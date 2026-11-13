@@ -185,7 +185,7 @@ function AnimFace:updateAnimation()
 		lefteye_pose = anim_data[frame_i].animface_lefteye_pose
 		righteye_pose = anim_data[frame_i].animface_righteye_pose
 
-		-- the keyframe seeking&interpolation pattern for eye direction is rather complex,,
+		-- the keyframe seeking&interpolation pattern for eye direction is rather complex,
 		-- perhaps abstract it away&reuse for the future
 		local lefteye_dir_1 , lefteye_dir_2  = __temptable1, __temptable2
 		local righteye_dir_1, righteye_dir_2 = __temptable3, __temptable4

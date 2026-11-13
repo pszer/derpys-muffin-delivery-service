@@ -61,9 +61,9 @@ function Grid:gridFromMesh(map_mesh)
 end
 
 function Grid:tile(x,z)
-	if x<1 or x>w or z<1 or z>h then
+	if x<1 or x>self.width or z<1 or z>self.height then
 		return nil end
-	return self[z][x]
+	return self.tiles[z][x]
 end
 
 function Grid:tileWorld(x,z)
@@ -76,10 +76,12 @@ end
 function Grid:tilesInWorldBox(x,z,w,h)
 	local tiles = {}
 
-	for X = math.min(0,math.floor(x / TILE_SIZE)), math.min(self.width,math.ceil((x+w)/TILE_SIZE))-1 do
-		for Z = math.min(0,math.floor(z / TILE_SIZE)), math.min(self.height,math.ceil((z+h)/TILE_SIZE))-1 do
+	for X = math.max(0,math.floor(x / TILE_SIZE)), math.min(self.width,math.ceil((x+w)/TILE_SIZE))-1 do
+		for Z = math.max(0,math.floor(z / TILE_SIZE)), math.min(self.height,math.ceil((z+h)/TILE_SIZE))-1 do
 
-			local tile = self:tile(X,Z)
+			print(X,Z)
+
+			local tile = self:tile(X+1,Z+1)
 			if tile then table.insert(tiles,tile) end
 
 		end
@@ -171,8 +173,8 @@ function Grid:getWallVerts(map_mesh, x,z , side )
 
 	tri1[1], tri1[2], tri1[3] = v1, v2, v3
 	tri2[1], tri2[2], tri2[3] = v3, v4, v1
-	tri1.normal = v1
-	tri2.normal = v4
+	tri1.normal = n1
+	tri2.normal = n4
 
 	return tri1, tri2
 end

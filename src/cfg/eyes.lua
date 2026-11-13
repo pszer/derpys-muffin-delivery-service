@@ -1,5 +1,3 @@
-local clone = require 'clone'
-
 EYES_ATTRIBUTES = {
 	["derpy_eyes"] = {
 		eyes_filename = "models/pony/derpyeyes.png",

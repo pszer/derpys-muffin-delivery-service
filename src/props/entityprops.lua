@@ -12,6 +12,7 @@ EntityPropPrototype = Props:prototype{
 	{"ent_identifier", "string", "entity", nil, [[the entity's unique name and identifier, may be altered by Prov:addEntity to ensure
 	                                              it is unique, do NOT alter during runtime]]},
 
+	{"ent_couple_hitbox", "boolean", true, nil, "If true, the hitbox's position/rotation/scale are coupled as the same table for the entity."},
 	{"ent_position", "table", nil, PropDefaultTable{0,0,0}  , "entity position" }, -- done
 	{"ent_rotation", "table", nil, PropDefaultTable{0,0,0, "rot"}  , "entity rotation" }, -- done
 	{"ent_scale", "table", nil, PropDefaultTable{1,1,1}, "entity scale" }, -- done
@@ -20,10 +21,10 @@ EntityPropPrototype = Props:prototype{
 	{"ent_velocity", "table", nil, PropDefaultTable{0,0,0} , [[entity velocity, there's no actual physics, only the x,z components are typically used
 	                                                           to have entities walk across the ground.]]},
 
-	{"ent_hitbox_inherit" , "boolean", true, nil, [[if true, the entity uses the same hitbox as the bounding box for it's model
-	                                                adequate for many situations.]]}, -- implement plzz
-	{"ent_hitbox_position", "table", nil, PropDefaultTable{-12,-24,-12}, "entity's hitbox position, local to ent_position"},
-	{"ent_hitbox_size", "table", nil, PropDefaultTable{24,24,24}, "entity's hitbox size, local to ent_position"},
+	{"ent_hitbox", nil, nil, nil, "entity hitbox (see hitbox.lua)"},
+
+	--{"ent_hitbox_position", "table", nil, PropDefaultTable{-12,-24,-12}, "entity's hitbox position, local to ent_position"},
+	--{"ent_hitbox_size", "table", nil, PropDefaultTable{24,24,24}, "entity's hitbox size, local to ent_position"},
 
 	{"ent_model", nil, nil, nil,                      "entity`s model instance. can be nil for logic entities."},
 	{"ent_model_name", nil, "", nil,                  "name of entity's model in cfg/custommodel, or a custom entry"},

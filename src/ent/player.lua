@@ -11,10 +11,14 @@ local EntityPlayerPrototype = EntityPropPrototype:extend{
 
 	{"ent_identifier", "string", "player", nil},
 	{"ent_model_name", "string", "derpy_model", nil},
+	{"ent_model_inherit" , "boolean", true, nil},
 
-	{"ent_hitbox_position", "table", nil, PropDefaultTable{-5,-32,-5}, "entity's hitbox position, local to ent_position"},
-	{"ent_hitbox_size", "table", nil, PropDefaultTable{10,32,10}, "entity's hitbox size, local to ent_position"},
-	{"ent_hitbox_inherit" , "boolean", false, nil},
+	{"ent_hitbox" , "hitbox", nil,
+		PropDefaultObject(Hitbox,{ box_position={900,-32,1200}, box_type="capsule", box_capsule={a={0,0,0},b={0,-32,0},radius=12}})},
+
+	--{"ent_hitbox_position", "table", nil, PropDefaultTable{-5,-32,-5}, "entity's hitbox position, local to ent_position"},
+	--{"ent_hitbox_size", "table", nil, PropDefaultTable{10,32,10}, "entity's hitbox size, local to ent_position"},
+	--{"ent_hitbox_inherit" , "boolean", false, nil},
 
 	{"ent_states", "table", nil, PropDefaultTable{
 		["state_walking"] = state_walking

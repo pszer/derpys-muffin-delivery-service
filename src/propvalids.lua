@@ -8,6 +8,8 @@ require 'math'
 require "set"
 require "timer"
 
+local clone = require 'clone'
+
 -- limits property to be one of the entries in given table argument t
 function PropIsOneOf(t)
 	return function(x)
@@ -81,6 +83,20 @@ function PropDefaultTable(table)
 			local t = {}
 			for i,v in pairs(table) do t[i]=v end
 			return true, t
+		else
+			return true, x
+		end
+	end
+end
+
+--[[
+-- 
+--]]
+function PropDefaultObject(def, table)
+	return function(x)
+		if not x then
+			local obj = def:new(clone(table))
+			return true, obj
 		else
 			return true, x
 		end

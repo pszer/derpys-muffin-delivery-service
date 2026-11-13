@@ -118,7 +118,7 @@ function Prov:load()
 	local cam = self.scene:getCamera()
 	cam:setController(
 		--camcontrol:followEntityFixed(theent, {0,-15,95}, {0.5,0.55,0.5}))
-		camcontrol:followEntityFixed(theent, {0,8.05*-2,35*2}, {0.5,0.49,0.5}))	
+		camcontrol:followEntityFixed(theent, {0,8.05*0,35*2}, {0.5,0.50,0.5}))	
 
 	local derpify = require 'derpify'
 	derpify(FACE_ATTRIBUTES.derpy_face, 'neutral', 'y', -0.1)
@@ -305,6 +305,7 @@ function Prov:updateEntityPartitionSpace()
 	for _,ent in ipairs(ents) do
 		if ent:areBoundsChanged() then
 			bins:remove(ent)
+			ent:updateBounds()
 			local pos, size = ent:getWorldHitboxPosSize()
 			bins:insert(ent, pos[1], pos[3], size[1], size[3])
 			ent:informNewBoundsAreHandled()
@@ -318,8 +319,6 @@ function Prov:createEntityFromPrototype(prototype, props)
 	local model_name = ent.ent_model_name
 	local ent_states = ent.ent_states
 	local ent_states = ent.ent_states
-
-	local ent_hitboxsize = ent.ent_hitbox_size
 
 	if model_name then
 		local model_i = nil

@@ -210,8 +210,8 @@ function ModelInstance:__new(props)
 	this.props.model_i_bounding_box.max = b
 
 	if not this:isStatic() and this.props.model_i_reference:isAnimated() then
-		this.props.model_i_animator1 = Animator:new(this)
-		this.props.model_i_animator2 = Animator:new(this)
+		--this.props.model_i_animator1 = Animator:new(this)
+		--this.props.model_i_animator2 = Animator:new(this)
 		this:allocateOutframeMatrices()
 	end
 
@@ -466,7 +466,6 @@ function ModelInstance:calculateBoundingBox()
 	local model_mat = self.static_model_matrix
 
 	local p = __p_temptable
-	-- beautiful
 	p[1][1] = min[1]     p[1][2] = min[2]    p[1][3] = min[3]  p[1][4] = 1
 	p[2][1] = max[1]     p[2][2] = min[2]    p[2][3] = min[3]  p[2][4] = 1
 	p[3][1] = min[1]     p[3][2] = max[2]    p[3][3] = min[3]  p[3][4] = 1
@@ -483,10 +482,10 @@ function ModelInstance:calculateBoundingBox()
 		mat_vec4_mul(vec, model_mat, vec)
 
 		-- perform w perspective division
-		local w = vec[4]
-		vec[1] = vec[1] / w
-		vec[2] = vec[2] / w
-		vec[3] = vec[3] / w
+		--local w = vec[4]
+		--vec[1] = vec[1] / w
+		--vec[2] = vec[2] / w
+		--vec[3] = vec[3] / w
 		--vec[4] = 1 
 	end
 
@@ -522,6 +521,8 @@ function ModelInstance:calculateBoundingBox()
 	self_bbox.max[1] = new_max[1]
 	self_bbox.max[2] = new_max[2]
 	self_bbox.max[3] = new_max[3]
+
+	return self_bbox
 end
 
 -- returns the bounding box

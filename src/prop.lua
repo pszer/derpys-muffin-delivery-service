@@ -149,7 +149,7 @@ __props_inst_mt = {
 			if prot then
 				return prot.default
 			else
-				error("key " .. tostring(key) .. "doesn't exist")
+				error("key " .. tostring(key) .. " doesn't exist")
 				return nil
 			end
 		end

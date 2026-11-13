@@ -1,24 +1,16 @@
 --
 -- 
 --
-
-local function __clone(dest, t, clone)
-	for i,v in pairs(t) do
-		local typ = provtype(v)
-		if typ ~= "table" then
-			dest[i] = v
-		else
-			dest[i] = {}
-			clone(dest[i], v, clone)
+local clone
+clone = function(t)
+	if type(t)=="table" then
+		local T = {}
+		for i,v in pairs(t) do
+			T[i]=clone(v)
 		end
+		return T
 	end
-	return dest
+	return t
 end
 
-return function(t)
-	return function()
-		local clone = {}
-		__clone(clone, t, __clone)
-		return clone
-	end
-end
+return clone

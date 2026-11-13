@@ -1,4 +1,4 @@
-local clone = require 'clone'
+local clone = require 'clonefunc'
 
 FACE_ATTRIBUTES = {
 

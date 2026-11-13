@@ -55,9 +55,7 @@ ModelInstancePropPrototype = Props:prototype{
 	{"model_i_outline_scale", "number", 0.10, nil,                      "model's contour scale factor"},
 	{"model_i_outline_flag", "boolean", false},
 
-	{"model_i_bounding_box", "table", nil, PropDefaultTable{min={0,0,0},max={0,0,0}}, [[model's bounding box, given by two min/max vectors,
-	                                                                                  calculated by transforming the bounding box from model_i_reference
-																					  this this model instances model matrix]]},
+	{"model_i_bounding_box", "table", nil, PropDefaultTable{min={0,0,0},max={0,0,0}}, [[model's bounding box, given by two min/max vectors, calculated by transforming the bounding box from model_i_reference this this model instances model matrix]]},
 
 	{"model_i_static"    , "boolean", false, nil, "is model instance static?"},
 
@@ -74,9 +72,9 @@ ModelInstancePropPrototype = Props:prototype{
 
 	{"model_i_decorations", "table", nil, PropDefaultTable{}, "model's ModelDecor objects"},
 
-	{"model_i_animator1", nil, nil, nil, "model's animator"},
-	{"model_i_animator2", nil, nil, nil, "each model has two animators to allow for interpolating between animations"},
-	{"model_i_animator_interp", "number", 0.0, nil, "interpolation between the two animators, 0.0 = animator1, 1.0 = animator2"},
+	--{"model_i_animator1", nil, nil, nil, "model's animator"},
+	--{"model_i_animator2", nil, nil, nil, "each model has two animators to allow for interpolating between animations"},
+	--{"model_i_animator_interp", "number", 0.0, nil, "interpolation between the two animators, 0.0 = animator1, 1.0 = animator2"},
 
 	{"model_i_animator_stack", "table", nil, PropDefaultTable{}, "stack of animators"},
 

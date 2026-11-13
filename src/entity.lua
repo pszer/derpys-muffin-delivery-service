@@ -2,6 +2,7 @@ require "props.entityprops"
 require "event"
 require "custommodel"
 require "gameinterface"
+require "hitbox"
 
 Entity = {__type = "entity"}
 Entity.__index = Entity
@@ -9,27 +10,32 @@ Entity.__index = Entity
 function Entity:new(props)
 	local this = {
 		props = EntityPropPrototype(props),
-
-		ent_moved = true,
-		recalculate_bounds_flag = true
 	}
 
 	setmetatable(this,Entity)
 
+	this:coupleHitbox()
 	return this
 end
 
 function Entity:newFromPrototype(prototype, props)
 	local this = {
 		props = prototype(props),
-
-		ent_moved = true,
-		recalculate_bounds_flag = true
 	}
 
 	setmetatable(this,Entity)
-
+	this:coupleHitbox()
 	return this
+end
+
+function Entity:coupleHitbox()
+	if self.props.ent_couple_hitbox then
+		self.props.ent_hitbox.props.box_position = self.props.ent_position
+		self.props.ent_hitbox.props.box_rotation = self.props.ent_rotation
+		self.props.ent_hitbox.props.box_scale = self.props.ent_scale
+		self.props.ent_hitbox:moved()
+		self:updateBounds()
+	end
 end
 
 -- this function should not be treated as a virtual function to overwrite, thats the job of Entity:update
@@ -43,13 +49,25 @@ function Entity:internalUpdate(dt)
 		end
 	end
 
-	self:translatePosition(self:getVelocity(), dt)
+	self:updateHitbox(dt)
 
-	self:updateModelPosition()
-	if self.props.ent_hitbox_inherit then
-		self:copyHitboxFromModel()
+	if self.props.ent_model_inherit then
+		self:updateModelPosition()
 	end
 	self.ent_moved = false
+end
+
+function Entity:areBoundsChanged()
+	if not self.props.ent_hitbox then return false end
+	return self.props.ent_hitbox:areBoundsChanged()
+end
+function Entity:updateBounds()
+	if not self.props.ent_hitbox then return false end
+	self.props.ent_hitbox:updateBounds()
+end
+function Entity:informNewBoundsAreHandled()
+	if not self.props.ent_hitbox then return end
+	self.props.ent_hitbox:informNewBoundsAreHandled()
 end
 
 function Entity:update()
@@ -57,33 +75,55 @@ function Entity:update()
 end
 
 function Entity:updateModelPosition()
-	local props = self.props
-	if props.ent_model_inherit then
-		local ent_pos = self:getPosition()
-		local ent_rot = self:getRotation()
-		local ent_scale = self:getScale()
+	if not self.props.ent_model_inherit then
+		return
+	end
 
-		local model_inst = props.ent_model
+	local model = self.props.ent_model
+	local hitbox = self.props.ent_hitbox
+	if model and hitbox then
+		local m_props = model.props
 
-		if model_inst then
-			model_inst:setPosition(ent_pos)
-			model_inst:setRotation(ent_rot)
-			model_inst:setScale(ent_scale)
-		end
+		model:setPosition(hitbox:getPosition())
+		model:setRotation(hitbox:getRotation())
+		model:setScale   (hitbox:getScale())
 	end
 end
 
+function Entity:getHitbox()
+	return self.props.ent_hitbox
+end
+
 function Entity:getPosition()
-	return self.props.ent_position end
+	local hitbox = self.props.ent_hitbox
+	if not hitbox then return nil end
+	return hitbox:getPosition() end
+
+function Entity:getBounds()
+	local hitbox = self.props.ent_hitbox
+	if not hitbox then return nil end
+	return hitbox:getBounds()	
+end
+
 function Entity:getRotation()
-	return self.props.ent_rotation end
+	local hitbox = self.props.ent_hitbox
+	if not hitbox then return nil end
+	return hitbox:getRotation() end
+
 function Entity:getScale()
-	return self.props.ent_scale end
+	local hitbox = self.props.ent_hitbox
+	if not hitbox then return nil end
+	return hitbox:getScale() end
+
 function Entity:getVelocity()
-	return self.props.ent_velocity end
+	local hitbox = self.props.ent_hitbox
+	if not hitbox then return nil end
+	return hitbox:getVelocity() end
+
 function Entity:getSpeed()
-	local vel = self:getVelocity()
-	return math.sqrt(vel[1]*vel[1] + vel[2]*vel[2] + vel[3]*vel[3])
+	local hitbox = self.props.ent_hitbox
+	if not hitbox then return nil end
+	return hitbox:getSpeed() 
 end
 -- uses manhattan distance instead of euclidian
 function Entity:getApproximateSpeed()
@@ -94,16 +134,9 @@ end
 
 local __temp_lmtspd_vec = {}
 function Entity:limitSpeed( max_speed )
-	local vel = self:getVelocity()
-	local spd = self:getSpeed()
-
-	if spd <= max_speed then return end
-
-	local scale = max_speed / spd;
-	__temp_lmtspd_vec[1] = scale * vel[1]
-	__temp_lmtspd_vec[2] = scale * vel[2]
-	__temp_lmtspd_vec[3] = scale * vel[3]
-	self:setVelocity( __temp_lmtspd_vec )
+	local hitbox = self.props.ent_hitbox
+	if not hitbox then return nil end
+	hitbox:limitSpeed(max_speed)
 end
 
 local __temp_scvel_vec = {}
@@ -112,12 +145,9 @@ local __temp_scvel_vec = {}
 -- <1.0 decreases velocity over time
 -- >1.0 increases velocity over time
 function Entity:scaleVelocity(scale, dt)
-	local diff = scale - 1.00
-	local vel = self:getVelocity()
-	__temp_scvel_vec[1] = vel[1] * diff
-	__temp_scvel_vec[2] = vel[2] * diff
-	__temp_scvel_vec[3] = vel[3] * diff
-	self:accelerate(__temp_scvel_vec, dt)
+	local hitbox = self.props.ent_hitbox
+	if not hitbox then return nil end
+	hitbox:scaleVelocity(scale,dt)
 end
 
 function Entity:getModel()
@@ -126,119 +156,52 @@ function Entity:getIdentifier()
 	return self.props.ent_identifier end
 
 function Entity:setVelocity(vel)
-	local v = self.props.ent_velocity
-	if vel[1]~=v[1]or vel[2]~=v[2] or vel[3]~=v[3] then
-		self.props.ent_velocity[1] = vel[1]
-		self.props.ent_velocity[2] = vel[2]
-		self.props.ent_velocity[3] = vel[3]
-		--self.props.ent_position = pos
-		--self.ent_moved = true
-		--self.recalculate_bounds_flag = true
-	end
+	local hitbox = self.props.ent_hitbox
+	if not self.props.ent_hitbox then return end
+	hitbox:setVelocity(vel)
 end
 
 local __temp_acc_vec = {}
 -- adds an acceleration vector to the entity, scaled by
 -- a given delta time step
 function Entity:accelerate(vec, dt)
-	local vel = self:getVelocity()
-	__temp_acc_vec[1] = vel[1] + vec[1] * dt
-	__temp_acc_vec[2] = vel[2] + vec[2] * dt
-	__temp_acc_vec[3] = vel[3] + vec[3] * dt
-	self:setVelocity(__temp_acc_vec)
+	local hitbox = self.props.ent_hitbox
+	if not self.props.ent_hitbox then return end
+	hitbox:accelerate(vec,dt)
 end
 
 function Entity:setPosition(pos)
-	local v = self.props.ent_position
-	if pos[1]~=v[1]or pos[2]~=v[2] or pos[3]~=v[3] then
-		--local ent_pos = self.props.ent_position
-		self.props.ent_position[1] = pos[1]
-		self.props.ent_position[2] = pos[2]
-		self.props.ent_position[3] = pos[3]
-		--self.props.ent_position = pos
-		self.ent_moved = true
-		self.recalculate_bounds_flag = true
-	end
+	if not self.props.ent_hitbox then return end
+	self.props.ent_hitbox:setPosition(pos)
 end
 function Entity:setRotation(rot)
-	local r = self.props.ent_rotation
-	if rot[1]~=r[1] or rot[2]~=r[2] or rot[3]~=r[3] or rot[4] ~= r[4] then
-		--self.props.ent_rotation = rot
-		self.props.ent_rotation[1] = rot[1]
-		self.props.ent_rotation[2] = rot[2]
-		self.props.ent_rotation[3] = rot[3]
-		self.props.ent_rotation[4] = rot[4]
-		self.ent_moved = true
-		self.recalculate_bounds_flag = true
-	end
+	if not self.props.ent_hitbox then return end
+	self.props.ent_hitbox:setRotation(rot)
 end
 function Entity:setScale(scale)
-	local s = self.props.ent_scale
-	if scale[1]~=s[1] or scale[2]~=s[2] or scale[3]~=s[3] then
-		self.props.ent_scale[1] = scale[1]
-		self.props.ent_scale[2] = scale[2]
-		self.props.ent_scale[3] = scale[3]
-		self.model_moved = true
-		self.recalculate_bounds_flag = true
-	end
+	if not self.props.ent_hitbox then return end
+	self.props.ent_hitbox:setScale(scale)
 end
 
 function Entity:translatePosition(vec, dt)
-	if vec[1]==0 and vec[2]==0 and vec[3]==0 then return end
-
-	local dt = dt or 1.0
-
-	local v = self.props.ent_position
-	local new_pos = {
-		v[1]+vec[1]*dt,
-		v[2]+vec[2]*dt,
-		v[3]+vec[3]*dt
-	}
-	self:setPosition(new_pos)
+	if not self.props.ent_hitbox then return end
+	self.props.ent_hitbox:translatePosition(vec,dt)
 end
 
-function Entity:copyHitboxFromModel()
-	local model = self.props.ent_model
-	if model then
-		local pos, size = model:getBoundingBoxPosSize()
-
-		self.props.ent_hitbox_size = size
-
-		-- an entity's hitbox has it's position stored locally to ent_position
-		-- this transforms the world co-ordinates to local space
-		local ent_pos = self:getPosition()
-		local local_pos = {
-			pos[1] - ent_pos[1],
-			pos[2] - ent_pos[2],
-			pos[3] - ent_pos[3] }
-
-		self.props.ent_hitbox_position = local_pos
+function Entity:updateHitbox(dt)
+	if self.props.ent_hitbox then
+		self.props.ent_hitbox:update(dt)
 	end
-end
-
-function Entity:updateHitbox()
-	--if self.props.ent_hitbox_inherit then
-end
-
-function Entity:areBoundsChanged()
-	return self.recalculate_bounds_flag
-end
-function Entity:informNewBoundsAreHandled()
-	self.recalculate_bounds_flag = false
 end
 
 -- returns {x,y,z}, {dx,dy,dz}
 function Entity:getWorldHitboxPosSize()
-	local pos = self:getPosition()
-	local hitbox_pos = self.props.ent_hitbox_position
-	local hitbox_size = self.props.ent_hitbox_size
+	local min,max = self:getBounds()
 
-	return { pos[1] + hitbox_pos[1],
-	         pos[2] + hitbox_pos[2],
-	         pos[3] + hitbox_pos[3] },
-		   { hitbox_size[1],
-		     hitbox_size[2],
-		     hitbox_size[3] }
+	if not min then return nil, nil end
+
+	return { min[1]          , min[2],           min[3] },
+		     { max[1] - min[1] , max[2] - min[2] , max[3] - min[3] }
 end
 
 -- returns {x,y,z}
@@ -263,9 +226,19 @@ function Entity:getHitboxPointByRelativeCoord(coord)
 	}
 end
 
---function Entity:currentState()
---	return self.props.ent_current_state
---end
+--[[
+--
+--
+--
+--
+--
+-- State functions
+--
+--
+--
+--
+--
+--]]
 
 function Entity:getStateByName(name)
 	if not name then return nil end
@@ -355,6 +328,24 @@ function Entity:disableStateByName(name)
 	end
 end
 
+function Entity:stateFromPrototype(GameData, prototype)
+	local state = prototype()
+
+	local proto_update = state.state_update
+	local proto_enter  = state.state_enter
+	local proto_exit   = state.state_exit
+
+	local proto_comms  = state.state_commands
+	for i,v in pairs(proto_comms) do
+		proto_comms[i] = v(GameData)
+	end
+	if state.state_update then state.state_update = state.state_update(GameData) end
+	if state.state_enter  then state.state_enter = state.state_enter(GameData) end 
+	if state.state_exit   then state.state_exit = state.state_exit(GameData) end
+
+	return state
+end
+
 -- returns true/false, and index of state in ent_current_states
 function Entity:isStateEnabled(state)
 	for i,v in pairs(self.props.ent_current_states) do
@@ -362,6 +353,17 @@ function Entity:isStateEnabled(state)
 	end
 	return false, nil
 end
+
+
+--
+--
+--
+--
+--
+--
+--
+--
+--
 
 function Entity:toBeDeleted()
 	return self.props.ent_delete_flag
@@ -391,57 +393,19 @@ function Entity:isModelAnimated()
 end
 
 --[[
-function Entity:getAnimator()
-	local model = self:getModel()
-	if not model then return nil,nil end
-	local anim1,anim2 = model:getAnimator()
-	return anim1, anim2
-end
-
-function Entity:playAnimation(anim, time, speed, loop, callback)
-	local anim1,anim2 = self:getAnimator()
-	if not anim1 then
-		error(string.format("Entity:playAnimation(): entity's \"%s\" model has no animators", self:getIdentifier())) end
-	anim1:playAnimation(anim, time, speed, loop, callback)
-	if anim2 then anim2:suspendAnimation() end
-end
-
-function Entity:playAnimationInterp(anim1, anim2, interp)
-	local model = self:getModel()
-	if not model then
-		error(string.format("Entity:playAnimationInterp(): entity "%s" has no model", self:getIdentifier())) end
-	local animator1,animator2 = self:getAnimator()
-	if not (anim1 and anim2) then
-		error(string.format("Entity:playAnimationInterp(): entity's \"%s\" model has no animators", self:getIdentifier())) end
-	animator1:playAnimationByName(unpack(anim1))
-	animator2:playAnimationByName(unpack(anim2))
-	model.props.model_i_animator_interp = interp
-end
-
-function Entity:setAnimationInterp(interp)
-	local model = self:getModel()
-	if not model then
-		error(string.format("Entity:setAnimationInterp(): entity "%s" has no model", self:getIdentifier())) end
-	model.props.model_i_animator_interp = interp
-end
-
-function Entity:setAnimationSpeed(speed, which)
-	local model = self:getModel()
-	if not model then
-		error(string.format("Entity:setAnimationSpeed(): entity "%s" has no model", self:getIdentifier())) end
-	local anim1,anim2 = self:getAnimator()
-	if not (anim1 and anim2) then
-		error(string.format("Entity:setAnimationSpeed(): entity's \"%s\" model has no animators", self:getIdentifier())) end
-	if not which then
-		anim1:setSpeed(speed)
-		anim2:setSpeed(speed)
-	elseif which == 1 then
-		anim1:setSpeed(speed)
-	else
-		anim2:setSpeed(speed)
-	end
-end--]]
-
+--
+--
+--
+--
+--
+-- Animation functions
+--
+--
+--
+--
+--
+--
+---]]
 function Entity:getAnimationByName(name)
 	local model = self:getModel()
 	if not model then
@@ -462,15 +426,21 @@ function Entity:setAnimationTime(time, which_animator)
 	end
 end
 
+--
+--
+--
+--
+--
+--
+--
+--
+--
+--
+
 -- takes in established hooks from Prov:establishEntityHooks()
 function Entity:addHook( hook )
 	table.insert(self.props.ent_hooks, hook)
 end
-
---function Entity:createHook( func )
---	local hook = Hook:new(func)
---	table.insert(self.props.ent_hooks, hook)
---end
 
 function Entity:clearHooks()
 	for i,hook in ipairs(self.props.ent_hooks) do
@@ -480,23 +450,5 @@ end
 
 function Entity:getHooksInfo()
 	return self.props.ent_hooks_info
-end
-
-function Entity:stateFromPrototype(GameData, prototype)
-	local state = prototype()
-
-	local proto_update = state.state_update
-	local proto_enter  = state.state_enter
-	local proto_exit   = state.state_exit
-
-	local proto_comms  = state.state_commands
-	for i,v in pairs(proto_comms) do
-		proto_comms[i] = v(GameData)
-	end
-	if state.state_update then state.state_update = state.state_update(GameData) end
-	if state.state_enter  then state.state_enter = state.state_enter(GameData) end 
-	if state.state_exit   then state.state_exit = state.state_exit(GameData) end
-
-	return state
 end
 
