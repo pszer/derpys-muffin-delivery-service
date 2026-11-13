@@ -1114,7 +1114,7 @@ function MapEditGUI:define(mapedit)
 		},
 		function(props) return
 		{lang["Save"],action=function()
-			mapedit:exportAndWriteToFile("test2.lua")
+			mapedit:exportAndWriteToFile()
 		end},
 		{lang["Open"],action=function()
 		end},

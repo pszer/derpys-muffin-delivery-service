@@ -322,7 +322,7 @@ function ModelInstance:updateAnimation(dont_step)
 	for i,v in ipairs(self.props.model_i_animator_stack) do
 		v:update()
 	end
-	self:fillOutBoneMatrices2()--]]
+	self:fillOutBoneMatrices()--]]
 end
 
 local __vec3temp = cpml.vec3.new()
@@ -628,7 +628,7 @@ function ModelInstance:getAnimator()
 end
 
 --function ModelInstance:fillOutBoneMatrices(animation, frame)
-function ModelInstance:fillOutBoneMatrices()
+--[[function ModelInstance:fillOutBoneMatrices()
 	--if not self.update_bones() then return end
 
 	local model = self:getModel()
@@ -651,7 +651,7 @@ function ModelInstance:fillOutBoneMatrices()
 		prof.pop("get_bone_matrices")
 		self.anim_generated = true
 	end
-end
+end--]]
 
 function ModelInstance:pushNewAnimator(index)
 	local animator = modelanimator:new(self)
@@ -673,7 +673,7 @@ function ModelInstance:removeAnimator(animator)
 	return false
 end
 
-function ModelInstance:fillOutBoneMatrices2()
+function ModelInstance:fillOutBoneMatrices()
 	if not self:isAnimated() then return end
 
 	local model = self:getModel()

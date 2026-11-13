@@ -120,7 +120,7 @@ function ProvMapEdit:load(args)
 	local quat = cpml.quat.from_angle_axis(math.pi/4.0,0,-1,0)
 	quat = quat * cpml.quat.from_angle_axis(math.pi/2.0,1,0,0)
 
-	local testdecal = mapdecal:new(
+	--[[local testdecal = mapdecal:new(
 		Loader:getTextureReference("uv.png"),"uv.png",{40*TILE_SIZE,1*TILE_HEIGHT,61*TILE_SIZE},{80,80,80},0.0*math.pi/4,{0,-1,0})
 	testdecal:generateVerts(self.props.mapedit_map_mesh.verts,
 	                        self.props.mapedit_map_width,
@@ -128,9 +128,8 @@ function ProvMapEdit:load(args)
 	                        self.props.mapedit_map_mesh.tile_vert_map,nil
 													)
 	testdecal:generateMesh()
-
 	local d_obj = self:makeDecalObject(testdecal)
-	self:addDecal(d_obj)
+	self:addDecal(d_obj)--]]
 end
 
 function ProvMapEdit:quit()
@@ -263,6 +262,9 @@ function ProvMapEdit:loadMap(map_name)
 	for i,v in ipairs(self.props.mapedit_model_groups) do
 		v:calcMinMax()
 	end
+
+	self.props.mapedit_map_name = map_name
+	self.props.mapedit_filename = map_name
 end
 
 function ProvMapEdit:reloadSkybox()
@@ -4614,6 +4616,16 @@ function ProvMapEdit:drawNitori(shader)
 	love.graphics.setStencilTest("notequal", 1)
 end
 
+function ProvMapEdit:drawTransformLine()
+	local x,y = love.mouse.getPosition()
+
+	love.graphics.setColor(self.selection_col[1],self.selection_col[2],self.selection_col[3],0.85)
+	if self.active_transform then
+		love.graphics.line(x,y,self.active_transform.mx-66,self.active_transform.my+66)
+	end
+	love.graphics.setColor(1,1,1,1)
+end
+
 function ProvMapEdit:drawDecals(shader)
 	love.graphics.setColor(1,1,1,1)
 	love.graphics.setDepthMode( "lequal", true  )
@@ -4886,6 +4898,8 @@ function ProvMapEdit:draw()
 	love.graphics.setDepthMode()
 	love.graphics.setBlendMode("alpha")
 	gui:draw()
+
+	self:drawTransformLine()
 end
 
 local __tempdir = {}
@@ -4976,6 +4990,8 @@ function ProvMapEdit:exportAndWriteToFile(filename)
 	local result,log = export_map(self.props, self.props.mapedit_filename, {save_groups=true})
 
 	love.filesystem.createDirectory("exports")
+
+	local filename = filename or self.props.mapedit_filename
 
 	if result then
 		local fullpath = "exports/"..filename

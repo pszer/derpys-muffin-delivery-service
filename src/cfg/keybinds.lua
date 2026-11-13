@@ -63,11 +63,12 @@ MAPEDIT_KEY_SETTINGS = {
 	["alt"]             = { "lalt"   , nil    , default = "lalt"},
 	["toggle_anim_tex"] = { "f3"     , nil    , default = "f3"},
 	["cycle_vision"]    = { "f9"     , nil    , default = "f9"},
+	["toggle_tile_orient"]    = { "t"     , nil    , default = "t"},
 
 	["edit_select"]     = { "mouse1"   ,  nil   , default = "mouse1" },
 	["edit_deselect"]   = { "mouse2"   ,  "q"   , default = "mouse2" },
-	["edit_undo"]       = { "pagedown" ,  nil   , default = "mouse2" },
-	["edit_redo"]       = { "pageup"   ,  nil   , default = "mouse2" },
+	["edit_undo"]       = { "pagedown" ,  nil   , default = "pagedown" },
+	["edit_redo"]       = { "pageup"   ,  nil   , default = "pageup" },
 	["edit_cycle_tool"] = { "tab"      ,  nil   , default = "tab" },
 	["edit_edit_tool"]  = { "1"        ,  nil   , default = "1" },
 	["edit_paint_tool"] = { "2"        ,  nil   , default = "2" },
@@ -89,7 +90,7 @@ MAPEDIT_KEY_SETTINGS = {
 	["panel_select"] = { "mouse1" , nil , default = "mouse1" },
 
 	["window_select"] = { "mouse1" , nil , default = "mouse1" },
-	["window_move"]   = { "mouse3" , nil , default = "mouse3" },
+	["window_move"]   = { "mouse4" , nil , default = "mouse3" },
 
 }
 

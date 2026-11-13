@@ -916,6 +916,7 @@ return {
 
 	decals = {
 		{name="uv.png",pos={40*24,1*-16,61*24},size={80,80,80},normal={0,-1,0},rot=math.pi/4},
+		{name="uv.png",pos={10*24,1*-16,61*24},size={80,80,80},normal={0,-1,0},rot=math.pi/4},
 	},
 
 	lights = {
