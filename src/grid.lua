@@ -67,8 +67,8 @@ function Grid:tile(x,z)
 end
 
 function Grid:tileWorld(x,z)
-	local x = math.floor(x / TILE_SIZE)+1
-	local z = math.floor(z / TILE_SIZE)+1
+	local x = math.floor(x / TILE_SIZE)
+	local z = math.floor(z / TILE_SIZE)
 	return self:tile(x,z)
 end
 
@@ -76,12 +76,12 @@ end
 function Grid:tilesInWorldBox(x,z,w,h)
 	local tiles = {}
 
-	for X = math.max(0,math.floor(x / TILE_SIZE)), math.min(self.width,math.ceil((x+w)/TILE_SIZE))-1 do
-		for Z = math.max(0,math.floor(z / TILE_SIZE)), math.min(self.height,math.ceil((z+h)/TILE_SIZE))-1 do
+	for X = math.max(1,math.floor(x / TILE_SIZE)), math.min(self.width,math.ceil((x+w)/TILE_SIZE))-1 do
+		for Z = math.max(1,math.floor(z / TILE_SIZE)), math.min(self.height,math.ceil((z+h)/TILE_SIZE))-1 do
 
 			print(X,Z)
 
-			local tile = self:tile(X+1,Z+1)
+			local tile = self:tile(X,Z)
 			if tile then table.insert(tiles,tile) end
 
 		end

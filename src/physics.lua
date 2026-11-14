@@ -1,16 +1,24 @@
--- "physics"
--- there's no real physics, just sticking entities to the floor
---
-
 require "gameinterface"
 
-local physics = {}
-physics.__index = physics
+require 'capsule'
+require 'intersect'
+
+Physics = {
+
+	gravity = {0.0,3.0,0.0}
+
+}
+Physics.__index = physics
 
 local CONSTS = require 'consts'
 
-function physics.getHeightAt(map,x,z)
-	local Xt,Zt = x/CONSTS.TILE_SIZE, z/CONSTS.TILE_SIZE	
+function Physics:applyGravity(hitbox, dt)
+	hitbox:accelerate(gravity, dt)	
 end
 
-return physics
+function Physics:commitVelocity(hitbox, dt)
+	hitbox:translatePosition(hitbox:getVelocity(), dt)
+end
+
+function Physics:collideAgainstTriangle(hitbox, t1,t2,t3)
+end

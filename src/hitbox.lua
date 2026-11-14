@@ -355,3 +355,6 @@ function Hitbox:translatePosition(vec, dt)
 	}
 	self:setPosition(new_pos)
 end
+
+function Hitbox:testBoundsAgainst(hitbox2)
+end

@@ -620,10 +620,11 @@ function ModelInstance:queryModelMatrix()
 	return self.static_model_matrix, self.static_normal_matrix
 end
 
-function ModelInstance:getAnimator()
+function ModelInstance:getBaseAnimator()
 	local props = self.props
-	local a1,a2 = props.model_i_animator1, props.model_i_animator2
-	return a1,a2
+	local stack = self.props.model_i_animator_stack
+	if not stack then return nil end
+	return stack[1]
 end
 
 --function ModelInstance:fillOutBoneMatrices(animation, frame)
@@ -700,7 +701,6 @@ function ModelInstance:sendToShader(shader, animate)
 	local shader = shader or love.graphics.getShader()
 
 	local model_u, normal_u = self:queryModelMatrix()
-	--model_u, normal_u = self:modelMatrix()
 	shadersend(shader, "u_model", "column", matrix(model_u))
 	shadersend(shader, "u_normal_model", "column", matrix(normal_u))
 

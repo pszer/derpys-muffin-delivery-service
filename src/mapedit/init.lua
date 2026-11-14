@@ -139,15 +139,15 @@ end
 function ProvMapEdit:loadNito()
 	self.nito_model = Model:fromLoader("mapedit/nito.iqm")
 	self.nito = ModelInstance:newInstance(self.nito_model,{["model_i_outline_flag"]=true,["model_i_static"]=false})
-	local a1 = self.nito:getAnimator()
-	self.nito.props.model_i_animator_interp=0.0
 
-	self.nito_anim_push = a1:getAnimationByName("Push")
-	self.nito_anim_paint = a1:getAnimationByName("Painting")
 	self.nito_animator = self.nito:pushNewAnimator()
+	--local a1 = self.nito:getBaseAnimator()
+	
+	self.nito_anim_push  = self.nito_model:getAnimation("Push")
+	self.nito_anim_paint = self.nito_model:getAnimation("Painting")
 
-	self.nito_animator.anim1:playAnimationByName("Push",0.0,1.0,true)
-	self.nito_animator.anim1:stopAnimation()
+	--self.nito_animator.anim1:playAnimationByName("Push",0.0,1.0,true)
+	--self.nito_animator.anim1:stopAnimation()
 end
 
 function ProvMapEdit:unload()
@@ -1902,7 +1902,7 @@ function ProvMapEdit:objectAtCursor(x, y, tests)
 	local cam_pos = cpml.vec3.new(cam:getPosition())
 	local unproject_v = unproject(cursor_v, viewproj, viewport_xywh)
 	local ray = {position=cam_pos, direction=cpml.vec3.normalize(unproject_v - cam_pos)}
-	self:createRayDebugVisual(ray.position, ray.direction)
+	--self:createRayDebugVisual(ray.position, ray.direction)	
 
 	local min_dist = 1/0
 	local mesh_test = nil
@@ -5140,5 +5140,6 @@ function ProvMapEdit:createRayDebugVisual(pos, dir)
 	end
 
 	local mesh = love.graphics.newMesh(mesh_format, verts, "triangles", "dynamic")
+	mesh:setVertexMap(vert_map)
 	self.debug_sight_ray_mesh = mesh
 end

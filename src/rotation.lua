@@ -81,6 +81,8 @@ function rotateMatrix(mat, rot)
 		__quattemp.y = rot[2]
 		__quattemp.z = rot[3]
 		__quattemp.w = rot[4]
+	else
+		error("Unknown rotation type "..rot[4])
 	end
 end
 

@@ -16,7 +16,9 @@ require "gameinterface"
 require "partition"
 require "assetloader"
 require "grid"
+require "physics"
 
+require '3ddebug'
 local camcontrol = require "cameracontrollers"
 
 local testmap = require "maps.test"
@@ -32,6 +34,8 @@ Prov = {
 	ent_bins = nil,
 
 	input_handlers = {},
+
+	render_hitboxes = true,
 
 	__dt = 0
 }
@@ -112,12 +116,18 @@ function Prov:load()
 	GameData:setupFromProv(self)
 
 	local playerproto  = require "ent.player"
-	theent = self:addEntityFromPrototype(playerproto, {ent_rotation = {0.0,0.0,1.0,"dir"}, ent_position = {300,-16,1500}})
+	theent = self:addEntityFromPrototype(playerproto, {ent_rotation = {0.0,0.0,1.0,"dir"}, ent_position = {250,-20,1500}})
 	theent:enableStateByName("state_walking")
+
+	local hemisphere = Model:fromLoader("Hemisphere.iqm")
+	hemisphere1 = ModelInstance:newInstance(hemisphere)
+	hemisphere2 = ModelInstance:newInstance(hemisphere)
+
+	self.scene:addModelInstance(hemisphere1)
+	self.scene:addModelInstance(hemisphere2)
 
 	local cam = self.scene:getCamera()
 	cam:setController(
-		--camcontrol:followEntityFixed(theent, {0,-15,95}, {0.5,0.55,0.5}))
 		camcontrol:followEntityFixed(theent, {0,8.05*0,35*2}, {0.5,0.50,0.5}))	
 
 	local derpify = require 'derpify'
@@ -131,17 +141,6 @@ function Prov:loadMap(map)
 	self.map = map
 	self.scene:loadMap(map)
 	self.grid = Grid:gridFromMesh(self.scene.map_mesh)
-
-	--[[ Debug gridFromMesh
-	--local function Vec3(v)
-		return string.format("(%s,%s,%s)", v[1] or '',v[2] or '',v[3] or '')
-	end
-	for z,Z in ipairs(self.grid.tiles) do
-		for x,X in ipairs(Z) do
-			local tri1 = X[3] or { {},{},{} }
-			print(x.." "..z, Vec3(tri1[1]), Vec3(tri1[2]), Vec3(tri1[3]) )
-		end
-	end--]]
 end
 
 function Prov:update(dt)
@@ -150,6 +149,16 @@ function Prov:update(dt)
 	if tickChanged() then
 		self:onTickChange()
 	end
+
+	local hb = theent:getHitbox()
+	local pos,a,b,rad = hb.props.box_position, hb.props.box_capsule.a, hb.props.box_capsule.b, hb.props.box_capsule.radius
+
+	hemisphere1:setScale{rad,rad,rad}
+	hemisphere1:setPosition{pos[1]+a[1],pos[2]+a[2],pos[3]+a[3]}
+	hemisphere2:setScale{rad,rad,rad}
+	hemisphere2:setPosition{pos[1]+b[1],pos[2]+b[2],pos[3]+b[3]}
+	hemisphere1:setRotation{math.pi,0,0,'rot'}
+	hemisphere2:setRotation{0,0,0,'rot'}
 
 	if scancodeIsDown("p", CTRL.GAME) then
 		self.scene:__removeAllModels()
@@ -189,8 +198,12 @@ end
 
 function Prov:draw()
 	prof.push("scene_draw")
-	self.scene:draw()
+	self.scene:draw(nil,{function()
+	for i,v in ipairs(self.ents) do
+		self.scene:drawHitbox(v)
+	end end})
 	prof.pop("scene_draw")
+
 
 	prof.push("hdr_postprocess")
 	Renderer.renderScaled(nil, {hdr_enabled=true})

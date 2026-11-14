@@ -20,6 +20,10 @@ local MODEL_ATTRIBUTES = {
 		["model_texture_fname"]  = "blue.png",
 		["model_vertex_winding"] = "cw"
 	},
+	["Hemisphere.iqm"] = {
+		["model_texture_fname"]  = "Transparent.png",
+		["model_vertex_winding"] = "cw"
+	},
 	["shittycrate.iqm"] = {
 		["model_texture_fname"]  = "models/shittycrate.png",
 		["model_vertex_winding"] = "cw"

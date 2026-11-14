@@ -217,6 +217,23 @@ function Scene:drawStaticModels(is_main_pass, model_subset)
 	end
 end
 
+function Scene:drawHitbox(ent)
+	local hitbox = ent.props.ent_hitbox
+	if not hitbox then return end
+
+	local shader = love.graphics.getShader()
+	local mats,meshes = Debug_3d:generateModelMats(hitbox)
+
+	for i=1,#mats do
+		print("hai", mats[i])
+		shadersend(shader, 'u_skinning', 0)
+		shadersend(shader, 'u_uses_tileatlas', false)
+		shadersend(shader, 'u_model','column',mats[i])
+		shadersend(shader, "u_draw_as_contour", false)
+		love.graphics.draw(meshes[i])
+	end
+end
+
 function Scene:cameraUpdate()
 	local cam = self.props.scene_camera
 	cam:update()
@@ -303,6 +320,7 @@ function Scene:draw(cam)
 	prof.push("drawmodels")
 	local models = self:getModelsInViewFrustrum()
 	self:drawModels(true, models)
+
 	prof.pop("drawmodels")
 
 	Renderer.dropCanvas()
