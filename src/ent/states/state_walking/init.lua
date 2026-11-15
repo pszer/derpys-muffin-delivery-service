@@ -20,17 +20,18 @@ local StateWalkingPrototype = EntityStatePropPrototype:extend{
 			local dt  = GameData:getDt()
 
 			if state.state_walking_deaccel then
-				ent:scaleVelocity(state.state_walking_deaccel_scale, dt)
+				ent:scaleHorizontalVelocity(state.state_walking_deaccel_scale, dt)
 
+				local h_speed = math.sqrt(vel[1]*vel[1] + vel[3]*vel[3])
 				if ent:getApproximateSpeed() < 0.1 then
-					ent:setVelocity{0,0,0}
+					ent:setVelocity{0,vel[2],0}
 					--ent:setAnimationTime(0, 1)
 					state.state_animator.anim1:setTime(0.0)
 				end
 			end
 
 			local walk_speed = state.state_walking_speed
-			ent:limitSpeed( walk_speed )
+			ent:limitHorizontalSpeed( walk_speed )
 			state.state_walking_deaccel = true
 
 			--local vel = ent:getVelocity()
@@ -52,7 +53,7 @@ local StateWalkingPrototype = EntityStatePropPrototype:extend{
 			end
 
 			local walk_speed = state.state_walking_speed
-			local ent_speed  = ent:getSpeed()
+			local ent_speed  = math.sqrt(vel[1]*vel[1] + vel[3]*vel[3])
 			--ent:setAnimationSpeed(0.75 + 0.25*(anim_speed * ent_speed / walk_speed))
 			--ent:setAnimationSpeed(1,1)
 			state.state_animator.anim1:setSpeed(anim_speed * ent_speed / walk_speed)

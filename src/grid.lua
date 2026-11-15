@@ -83,11 +83,8 @@ end
 -- the table is static and old entries remain
 function Grid:tilesInWorldBox(x,z,w,h)
 	local tiles = {}
-
 	for X = math.max(1,math.floor(x / TILE_SIZE)), math.min(self.width,math.ceil((x+w)/TILE_SIZE)-1) do
 		for Z = math.max(1,math.floor(z / TILE_SIZE)), math.min(self.height,math.ceil((z+h)/TILE_SIZE)-1) do
-
-			print(X,Z)
 
 			local tile = self:tile(X,Z)
 			if tile then
@@ -108,10 +105,6 @@ function Grid:populateTilesInWorldBox(x,z,w,h)
 
 	for X = math.max(1,math.floor(x / TILE_SIZE)), math.min(self.width,math.ceil((x+w)/TILE_SIZE)-1) do
 		for Z = math.max(1,math.floor(z / TILE_SIZE)), math.min(self.height,math.ceil((z+h)/TILE_SIZE)-1) do
-
-			print("mi bombo")
-			print(X,Z)
-
 			local tile = self:tile(X,Z)
 
 			if tile then

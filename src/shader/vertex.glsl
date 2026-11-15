@@ -248,7 +248,7 @@ vec3 diffuse_lighting_2( vec3 normal, vec3 light_dir, vec4 light_col) {
 }
 
 vec3 specular_highlight( vec3 normal , vec3 light_dir, vec4 light_col ) {
-	float specular_strength = 1.2;
+	float specular_strength = 1.5;
 
 	vec3 view_dir = normalize( view_pos - frag_w_position );
 	vec3 light_dir_n = normalize( light_dir);
@@ -583,7 +583,7 @@ void effect( ) {
 	light += dir_light_result;
 
 	//
-	// EVIL SHIT - no cubemap arrays, no glsl 4.0+ variable indexing.
+	// EVIL - no cubemap arrays, no glsl 4.0+ variable indexing.
 	//
 	#define DO_POINT_LIGHT(i) if (u_point_light_count > i){if (point_light_has_shadow_map[i]) {light += calc_point_light_col_shadow(i, normal, i, point_bias, point_light_shadow_maps[i]);} else {light += calc_point_light_col_full(i, normal);}}
 	float point_bias = 0.5;

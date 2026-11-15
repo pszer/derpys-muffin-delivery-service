@@ -72,9 +72,9 @@ function Capsule:againstTriangle(out, pos,height,radius, vel, _t0,_t1,_t2)
 	local abs   = math.abs
 
 	local velocity = __temp_velocity
-	velocity.x = vel[1]
-	velocity.y = vel[2]
-	velocity.z = vel[3]
+	velocity.x = vel.x
+	velocity.y = vel.y
+	velocity.z = vel.z
 
 	-- place arguments into the pre-allocated cpml vec3s,
 	local c0 = __tempc_a
@@ -122,17 +122,17 @@ function Capsule:againstTriangle(out, pos,height,radius, vel, _t0,_t1,_t2)
 	local a1 = t1
 	local a2 = t2
 	local b0,b1,b2 = __b0,__b1,__b2 -- use pre-allocated
-	b0.x = t0.x + c01.x 
-	b0.y = t0.y + c01.y 
-	b0.z = t0.z + c01.z 
+	b0.x = t0.x - c01.x 
+	b0.y = t0.y - c01.y 
+	b0.z = t0.z - c01.z 
 	--
-	b1.x = t1.x + c01.x 
-	b1.y = t1.y + c01.y 
-	b1.z = t1.z + c01.z 
+	b1.x = t1.x - c01.x 
+	b1.y = t1.y - c01.y 
+	b1.z = t1.z - c01.z 
 	--
-	b2.x = t2.x + c01.x 
-	b2.y = t2.y + c01.y 
-	b2.z = t2.z + c01.z 
+	b2.x = t2.x - c01.x 
+	b2.y = t2.y - c01.y 
+	b2.z = t2.z - c01.z 
 
 	-- test point against extruted triangular prism
 	if Intersect.pointInTriangularPrism(c0, a0,a1,a2, b0,b1,b2) then

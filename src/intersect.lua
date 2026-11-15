@@ -4,8 +4,8 @@ Intersect.__index = Intersect
 local cpml = require 'cpml'
 
 local dot   = cpml.vec3.dot
-local cross = cpml.vec3.cross
-local normalize = cpml.vec3.normalize
+--local cross = cpml.vec3.cross
+--local normalize = cpml.vec3.normalize
 local abs   = math.abs
 
 -- cross product of a and b stored in out
@@ -88,6 +88,9 @@ function Intersect.pointInTriangularPrism(point, a0,a1,a2,b0,b1,b2)
 	faces[3][1], faces[3][2], faces[3][3] = a0,b0,a1
 	faces[4][1], faces[4][2], faces[4][3] = a1,b1,a2
 	faces[5][1], faces[5][2], faces[5][3] = a2,b2,a0
+	--faces[3][1], faces[3][2], faces[3][3] = a1,b0,a0
+	--faces[4][1], faces[4][2], faces[4][3] = a2,b1,a1
+	--faces[5][1], faces[5][2], faces[5][3] = a0,b2,a2
 
 	local sign = nil
 	-- if intersection happens, the sign for the dot product d will be
@@ -103,10 +106,7 @@ function Intersect.pointInTriangularPrism(point, a0,a1,a2,b0,b1,b2)
 		p02.x = p2.x-p0.x
 		p02.y = p2.y-p0.y
 		p02.z = p2.z-p0.z
-		--local p01 = p1-p0
-		--local p02 = p2-p0
 
-		--local norm = cpml.vec3.cross(p01,p02)
 		Intersect.__cross(__temp_norm, p01,p02) -- use pre-allocated
 		local norm = __temp_norm
 
@@ -132,7 +132,7 @@ function Intersect.sweepSphereTrianglePlane(sweep, c, r, v, t0,t1,t2, n)
 	local pen = r - d
 
 	if pen > 0 then
-		t = 0 -- Sphere already starts coliding with triangle plane.
+		t = 0 -- Sphere already starts colliding with triangle plane.
 	else
 		-- Sphere isn't immediately colliding with the plane. Check if it's moving away.
 		local denom = dot(n,v)
@@ -145,7 +145,7 @@ function Intersect.sweepSphereTrianglePlane(sweep, c, r, v, t0,t1,t2, n)
 		pen = 0
 	end
 
-	if t >= sweep.time then
+	if t > sweep.time or (t == sweep.time and pen < sweep.depth)then
 		return false
 	end
 
@@ -163,8 +163,10 @@ function Intersect.sweepSphereTrianglePlane(sweep, c, r, v, t0,t1,t2, n)
 	-- Plane collision point is inside the triangle. So the sphere collides with the triangle.
 	sweep.time = t
 	sweep.depth = pen
-	sweep.point = collision:clone()
-	sweep.normal = n:clone()
+	--sweep.point = collision:clone()
+	--sweep.normal = n:clone()
+	sweep.setPoint(collision)
+	sweep.setNormal(n)
 	sweep.winner = "sweepSphereTrianglePlane"
 	return true
 end
@@ -195,7 +197,7 @@ function Intersect.sweepSphereParallelogramPlane(sweep, c, r, v, t0,t1,t2, n)
 		pen = 0
 	end
 
-	if t >= sweep.time then
+	if t > sweep.time or (t == sweep.time and pen < sweep.depth) then
 		return false
 	end
 
@@ -211,8 +213,10 @@ function Intersect.sweepSphereParallelogramPlane(sweep, c, r, v, t0,t1,t2, n)
 	-- Plane collision point is inside the triangle. So the sphere collides with the triangle.
 	sweep.time = t
 	sweep.depth = pen
-	sweep.point = collision:clone()
-	sweep.normal = n:clone()
+	--sweep.point = collision:clone()
+	--sweep.normal = n:clone()
+	sweep.setPoint(collision)
+	sweep.setNormal(n)
 	sweep.winner = "sweepSphereParallelogramPlane"
 	return true
 end
@@ -223,6 +227,8 @@ local __temp_collision = cpml.vec3.new()
 local __temp_center = cpml.vec3.new()
 local __temp_c0collision = cpml.vec3.new()
 local __temp_nvec = cpml.vec3.new()
+
+local __temp_k = cpml.vec3.new()
 
 -- Sweep point P with velocity V against cylinder C0,C1,r, ignoring the endcaps.
 function Intersect.sweepPointUncappedCylinder(sweep, p, v, c0, c1, r, fallback_normal)
@@ -239,6 +245,8 @@ function Intersect.sweepPointUncappedCylinder(sweep, p, v, c0, c1, r, fallback_n
 	local dn = dot(d,n)
 	local vn = dot(v,n)
 	local nn = dot(n,n)
+
+	if nn < Physics.epsilon then return false end
 
 	if dn < 0 and dn+vn < 0 then return false end  -- outside c0 end
 	if dn > nn and dn+vn > nn then return false end -- outside c1 end
@@ -278,6 +286,11 @@ function Intersect.sweepPointUncappedCylinder(sweep, p, v, c0, c1, r, fallback_n
 	collision.y = p.y + t * v.y
 	collision.z = p.z + t * v.z
 
+	local k = dn + t*vn
+	if k < 0 or k > nn then
+		return false
+	end
+
 	local center = __temp_center -- use pre-allocated
 	if nn < Physics.epsilon then
 		center = c0
@@ -302,14 +315,17 @@ function Intersect.sweepPointUncappedCylinder(sweep, p, v, c0, c1, r, fallback_n
 	-- fill out details
 	sweep.time = t
 	sweep.depth = (t > 0 and 0) or depth
-	sweep.point = collision:clone()
+	--sweep.point = collision:clone()
+	sweep.setPoint(collision)
 	if len >= Physics.epsilon then
 		vec.x = vec.x / len
 		vec.y = vec.y / len
 		vec.z = vec.z / len
-		sweep.normal = vec:clone()
+		--sweep.normal = vec:clone()
+		sweep.setNormal(vec)
 	else
-		sweep.normal = fallback_normal:clone()
+		--sweep.normal = fallback_normal:clone()
+		sweep.setNormal(fallback_normal)
 	end
 	sweep.winner = "sweepPointUncappedCylinder"
 	return true
@@ -364,14 +380,18 @@ function Intersect.sweepPointSphere(sweep, p, v, s, r, fallback_normal)
 
 	sweep.time = t
 	sweep.depth = (t>0 and 0) or r - len
-	sweep.point = collision:clone()
+
+	--sweep.point = collision:clone()
+	sweep.setPoint(collision)
 	if len >= Physics.epsilon then
 		vec.x = vec.x/len
 		vec.y = vec.y/len
 		vec.z = vec.z/len
-		sweep.normal = vec:clone()
+		sweep.setNormal(vec)
+		--sweep.normal = vec:clone()
 	else
-		sweep.normal = fallback_normal:clone()
+		sweep.setNormal(fallback_normal)
+		--sweep.normal = fallback_normal:clone()
 	end
 	sweep.winner = "sweepPointSphere"
 	return true

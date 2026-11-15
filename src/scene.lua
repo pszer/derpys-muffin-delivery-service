@@ -244,6 +244,7 @@ function Scene:update()
 	self:updateModelPartitionSpace()
 	self:cameraUpdate()
 	self:updateMapMeshUvs()
+	self:updateModelMatrices()
 	prof.pop("update_model_partition_space")
 end
 

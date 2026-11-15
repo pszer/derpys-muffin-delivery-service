@@ -9,27 +9,45 @@ require 'grid'
 local CONSTS = require 'consts'
 
 Physics = {
-	gravity = {0.0,3.0,0.0},
-	epsilon = 0.00005,
-	max_iters = 8,
+	gravity = {0.0,800.0,0.0},
+	epsilon = 0.000005,
+	grid_slack = TILE_SIZE/24,
+	max_iters = 16,
 }
-Physics.__index = physics
+Physics.__index = Physics
 
 function Physics:applyGravity(hitbox, dt)
-	hitbox:accelerate(gravity, dt)	
+	hitbox:accelerate(self.gravity, dt)	
 end
 
 function Physics:resolveHitbox(hitbox, dt, grid)
-	hitbox:updateBounds()
 	local min,max = hitbox:getBounds()
-
+	local velocity = hitbox:getVelocity()
 	if grid then
 		local x,z,w,r = min[1], min[3], max[1]-min[1], max[3]-min[3]
-		local tiles, tiles_count, mx,mz,Mx,Mz = grid:populateTilesInWorldBox(x,z,w,r)
 
-		if mx then
-			print(mx..","..mz.." "..Mx..","..Mz)
+		-- add slack for sliding across walls
+		x=x-Physics.grid_slack
+		z=z-Physics.grid_slack
+		w=w+Physics.grid_slack*2
+		r=r+Physics.grid_slack*2
+
+		-- expand by velocity
+		local vx,vz = velocity[1], velocity[3]
+		if vx < 0 then
+			x=x+vx
+			w=w-vx
+		else
+			w=w+vx
 		end
+		if vz < 0 then
+			z=z+vz
+			r=r-vz
+		else
+			r=r+vz
+		end
+
+		local tiles, tiles_count, mx,mz,Mx,Mz = grid:populateTilesInWorldBox(x,z,w,r)
 
 		if hitbox:type() == "capsule" then
 			self:resolveCollisionsCapsule(hitbox, dt, tiles, 1,tiles_count)
@@ -37,6 +55,7 @@ function Physics:resolveHitbox(hitbox, dt, grid)
 			error("Not implemented")
 		end
 	end
+	hitbox:updateBounds()
 end
 
 local __temp_capsule = {}
@@ -47,6 +66,10 @@ local __temp_vec3_2  = cpml.vec3.new()
 local __temp_vec3_3  = cpml.vec3.new()
 local __temp_vec3_vel = cpml.vec3.new()
 local __temp_trans = {0,0,0}
+
+local __sweep_point = cpml.vec3.new()
+local __sweep_normal = cpml.vec3.new()
+
 --
 -- info contains time,depth,normal,point
 -- the triangles between min_i and max_i are tested
@@ -80,16 +103,26 @@ function Physics:resolveCollisionsCapsule(hitbox, dt, triangles, tri_min_i, tri_
 		local sweep = __temp_sweep
 		sweep.time   = 1.0
 		sweep.depth  = nil
-		sweep.normal = nil
-		sweep.point  = nil
-		sweep.winner = nil
+		sweep.normal = __sweep_normal
+		sweep.point  = __sweep_point
+		sweep.winner = __sweep_normal
+		sweep.setPoint = function(v)
+			sweep.point.x=v.x
+			sweep.point.y=v.y
+			sweep.point.z=v.z
+		end
+		sweep.setNormal = function(v)
+			sweep.normal.x=v.x
+			sweep.normal.y=v.y
+			sweep.normal.z=v.z
+		end
 
 		for tri_i=tri_min_i,tri_max_i do
 			local triangle = triangles[tri_i]
 			local t0 = triangle[1]
 			local t1 = triangle[2]
 			local t2 = triangle[3]
-			Capsule:againstTriangle(sweep, boxprops.box_position, boxprops.box_capsule_height, boxprops.box_capsule_radius, velocity, t0,t1,t2)
+			Capsule:againstTriangle(sweep, boxprops.box_position, boxprops.box_capsule_height, boxprops.box_capsule_radius, u, t0,t1,t2)
 		end
 
 		-- resolve intersection
@@ -115,13 +148,6 @@ function Physics:resolveCollisionsCapsule(hitbox, dt, triangles, tri_min_i, tri_
 
 		hit = true
 
-		print("")
-		print(sweep.time)
-		print(sweep.depth)
-		print(sweep.normal)
-		print(sweep.point/TILE_SIZE)
-		print(sweep.winner)
-
 		-- avoiding cpml operators + results in fewer memory overhead
 		u.x = u.x - dp.x
 		u.y = u.y - dp.y
@@ -137,15 +163,12 @@ function Physics:resolveCollisionsCapsule(hitbox, dt, triangles, tri_min_i, tri_
 
 		-- cancel motion parallel to the normal vector, such that the capsule
 		-- slides across the surface
-		u.x = u.x + dot_un * sweep.normal.x
-		u.y = u.y + dot_un * sweep.normal.y
-		u.z = u.z + dot_un * sweep.normal.z
-		hitbox:setVelocity(velocity[1] + dot_vn * sweep.normal.x,
-		                   velocity[2] + dot_vn * sweep.normal.y,
-											 velocity[3] + dot_vn * sweep.normal.z)
-		--velocity[1] = velocity[1] + dot_vn * sweep.normal.x
-		--velocity[2] = velocity[2] + dot_vn * sweep.normal.y
-		--velocity[3] = velocity[3] + dot_vn * sweep.normal.z
+		u.x = u.x - dot_un * sweep.normal.x
+		u.y = u.y - dot_un * sweep.normal.y
+		u.z = u.z - dot_un * sweep.normal.z
+		hitbox:setVelocity(velocity[1] - dot_vn * sweep.normal.x,
+		                   velocity[2] - dot_vn * sweep.normal.y,
+											 velocity[3] - dot_vn * sweep.normal.z)
 
 		-- avoid another collision by nudging an epsilon amount
 		local offset = __temp_vec3_3
@@ -154,11 +177,5 @@ function Physics:resolveCollisionsCapsule(hitbox, dt, triangles, tri_min_i, tri_
 		offset.z = Physics.epsilon * sweep.normal.z
 
 		translateCapsule(offset)
-		velocity[1] = velocity[1] + offset.x
-		velocity[2] = velocity[2] + offset.y
-		velocity[3] = velocity[3] + offset.z
-		u.x = u.x + offset.x
-		u.y = u.y + offset.y
-		u.z = u.z + offset.z
 	end
 end

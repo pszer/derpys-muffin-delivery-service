@@ -546,9 +546,13 @@ function ModelInstance:getModelReference()
 	return self.props.model_i_reference
 end
 
+function ModelInstance:moved()
+	self.model_moved = true
+end
+
 function ModelInstance:setPosition(pos)
 	local v = self.props.model_i_position
-	if pos[1]~=v[1]or pos[2]~=v[2] or pos[3]~=v[3] then
+	if pos[1]~=v[1] or pos[2]~=v[2] or pos[3]~=v[3] then
 		self.props.model_i_position[1] = pos[1]
 		self.props.model_i_position[2] = pos[2]
 		self.props.model_i_position[3] = pos[3]

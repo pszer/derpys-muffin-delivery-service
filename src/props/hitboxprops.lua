@@ -17,7 +17,7 @@ HitboxPropPrototype = Props:prototype{
 	{"box_type", "string", nil, PropIsOneOf{'box','capsule','sphere','model'}  , "hitbox type" }, -- done
 
 	-- These define the shape of the hitbox, to transform the hitbox use the position/rotation/scale attributes.
-	{"box_aabb"        , "table", nil, PropDefaultTable{0,0,0,0}, "hitbox AABB spec if of 'box' type. (x,y,w,h)"},
+	{"box_aabb"        , "table", nil, PropDefaultTable{0,0,0}, "hitbox AABB spec if of 'box' type. (w,h,d)"},
 
 	--{"box_capsule"     , "table", nil, PropDefaultTable{a={0,0,0},b={0,0,0},radius=0}, "hitbox capsule spec if of 'capsule' type."},
 	--

@@ -20,10 +20,9 @@ end
 
 function Hitbox:update(dt)
 	--self:translatePosition(self:getVelocity(), dt)
-
-	if recalculate_bounds_flag then
+	if self.recalculate_bounds_flag then
 		-- TODO recalculate bounding box
-		recalculate_bounds_flag = false
+		self.recalculate_bounds_flag = false
 	end
 end
 
@@ -128,8 +127,8 @@ function Hitbox:updateBounds()
 
 		props.box_bounds.min[1]= point[1]-radius
 		props.box_bounds.max[1]= point[1]+radius
-		props.box_bounds.min[2]= math.min(v_a[2],v_b[2])
-		props.box_bounds.max[2]= math.max(v_a[2],v_b[2])
+		props.box_bounds.min[2]= math.min(v_a[2]-radius,v_b[2]-radius)
+		props.box_bounds.max[2]= math.max(v_a[2]+radius,v_b[2]+radius)
 		props.box_bounds.min[3]= point[3]-radius
 		props.box_bounds.max[3]= point[3]+radius
 
@@ -143,7 +142,8 @@ function Hitbox:updateBounds()
 	elseif self:type() == "box" then
 		local mat = self:generateModelMat()
 
-		local x,y,z,w,h,r = props.box_aabb[1], props.box_aabb[1], props.box_aabb[3], props.box_aabb[4]
+		local x,y,z = props.box_position[1], props.box_position[2], props.box_position[3]
+		local w,h,d = props.box_aabb[1], props.box_aabb[2], props.box_aabb[3]
 
 		-- if negative
 		if w<0 then x=x-w; w=-w end
@@ -164,11 +164,6 @@ function Hitbox:updateBounds()
 		for i=1,8 do
 			local vec = p[i]
 			mat_vec4_mul(vec, model_m, vec)
-		--	local w = vec[4]
-		--	vec[1] = vec[1] / w
-		--	vec[2] = vec[2] / w
-		--	vec[3] = vec[3] / w
-		--	vec[4] = 1 
 		end
 		-- we find out the new min/max x,y,z components of all the
 		-- transformed vertices to get the min/max for our new
@@ -231,7 +226,7 @@ function Hitbox:modelMatrix()
 		vec3 = cpml.vec3.new(pos)
 		cpml.mat4.translate(mat, mat, vec3)
 		if dirfix then
-			mat = cpml.mat.mul(mat, mat, dirfix)
+			mat = cpml.mat4.mul(mat, mat, dirfix)
 		end
 
 		local norm_m = props.box_normal_mat
@@ -369,16 +364,26 @@ function Hitbox:scaleVelocity(scale, dt)
 	__temp_scvel_vec[3] = vel[3] * diff
 	self:accelerate(__temp_scvel_vec, dt)
 end
+function Hitbox:scaleHorizontalVelocity(scale, dt)
+	local diff = scale - 1.00
+	local vel = self:getVelocity()
+	__temp_scvel_vec[1] = vel[1] * diff
+	__temp_scvel_vec[2] = 0.0
+	__temp_scvel_vec[3] = vel[3] * diff
+	self:accelerate(__temp_scvel_vec, dt)
+end
 
 local __temp_lmtspd_vec = {}
-function Hitbox:limitSpeed( max_speed )
+function Hitbox:limitHorizontalSpeed( max_speed )
 	local vel = self:getVelocity()
-	local spd = self:getSpeed()
-	if spd <= max_speed then return end
+	--local spd = self:getSpeed()
+	--if spd <= max_speed then return end
+	local h_speed = math.sqrt(vel[1]*vel[1] + vel[3]*vel[3])
+	if h_speed <= max_speed then return end
 
-	local scale = max_speed / spd;
+	local scale = max_speed / h_speed;
 	__temp_lmtspd_vec[1] = scale * vel[1]
-	__temp_lmtspd_vec[2] = scale * vel[2]
+	__temp_lmtspd_vec[2] = vel[2]
 	__temp_lmtspd_vec[3] = scale * vel[3]
 	self:setVelocity( __temp_lmtspd_vec )
 end
@@ -422,17 +427,17 @@ function Hitbox:setScale(scale)
 		self:moved()
 	end
 end
+local __temp_newp={}
 function Hitbox:translatePosition(vec, dt)
 	if self.props.box_static then return end
 	if vec[1]==0 and vec[2]==0 and vec[3]==0 then return end
 	assert(dt)
 
 	local v = self.props.box_position
-	local new_pos = {
-		v[1]+vec[1]*dt,
-		v[2]+vec[2]*dt,
-		v[3]+vec[3]*dt
-	}
+	local new_pos = __temp_newp
+	new_pos[1] = v[1] + vec[1]*dt
+	new_pos[2] = v[2] + vec[2]*dt
+	new_pos[3] = v[3] + vec[3]*dt
 	self:setPosition(new_pos)
 	self:moved()
 end

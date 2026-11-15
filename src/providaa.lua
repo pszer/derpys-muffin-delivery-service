@@ -116,7 +116,7 @@ function Prov:load()
 	GameData:setupFromProv(self)
 
 	local playerproto  = require "ent.player"
-	theent = self:addEntityFromPrototype(playerproto, {ent_rotation = {0.0,0.0,1.0,"dir"}, ent_position = {0,-20,0}})
+	theent = self:addEntityFromPrototype(playerproto, {ent_rotation = {0.0,0.0,1.0,"dir"}, ent_position = {128,-250,128}})
 	theent:enableStateByName("state_walking")
 
 	local hemisphere = Model:fromLoader("Hemisphere.iqm")
@@ -161,6 +161,15 @@ function Prov:update(dt)
 	self:pollInputHandlers()
 	prof.pop("pollinputhandlers")
 
+	local hb = theent:getHitbox()
+	hb.props.box_velocity[2] = hb.props.box_velocity[2] + 1200*dt
+
+	if love.keyboard.isDown('space') then
+		hb.props.box_velocity[2] = -400
+	end
+
+	self:updateEntsLogic()
+
 	prof.push("physics")
 	Physics:resolveHitbox(theent:getHitbox(), dt, self.grid)
 	prof.pop("physics")
@@ -171,8 +180,6 @@ function Prov:update(dt)
 
 	local hb = theent:getHitbox()
 	local pos,height,rad = hb.props.box_position, hb.props.box_capsule_height, hb.props.box_capsule_radius
-
-	print(pos[1],pos[2],pos[3])
 
 	hemisphere1:setScale{rad*2,rad*2,rad*2}	
 	hemisphere1:setPosition{pos[1],pos[2]-rad,pos[3]}
@@ -280,6 +287,12 @@ end
 
 function Prov:getEntities()
 	return self.ents
+end
+
+function Prov:updateEntsLogic(dt)
+	for i,ent in ipairs(self.ents) do
+		ent:updateLogic()
+	end
 end
 
 function Prov:updateEnts(dt)

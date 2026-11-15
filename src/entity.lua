@@ -38,17 +38,23 @@ function Entity:coupleHitbox()
 	end
 end
 
--- this function should not be treated as a virtual function to overwrite, thats the job of Entity:update
--- let this do what its gotta do
-function Entity:internalUpdate(dt)
-	assert(dt)
-
+function Entity:updateLogic()
 	for i,v in pairs(self.props.ent_current_states) do
 		if v.state_update then
 			v.state_update(self, v)
 		end
 	end
+end
 
+-- this function should not be treated as a virtual function to overwrite, thats the job of Entity:update
+-- let this do what its gotta do
+function Entity:internalUpdate(dt)
+	assert(dt)
+	--[[for i,v in pairs(self.props.ent_current_states) do
+		if v.state_update then
+			v.state_update(self, v)
+		end
+	end--]]
 	self:updateHitbox(dt)
 
 	if self.props.ent_model_inherit then
@@ -87,6 +93,7 @@ function Entity:updateModelPosition()
 		model:setPosition(hitbox:getPosition())
 		model:setRotation(hitbox:getRotation())
 		model:setScale   (hitbox:getScale())
+		model:moved()
 	end
 end
 
@@ -132,11 +139,15 @@ function Entity:getApproximateSpeed()
 	return abs(vel[1]) + abs(vel[2]) + abs(vel[3])
 end
 
-local __temp_lmtspd_vec = {}
-function Entity:limitSpeed( max_speed )
+function Entity:limitHorizontalSpeed( max_speed )
 	local hitbox = self.props.ent_hitbox
 	if not hitbox then return nil end
-	hitbox:limitSpeed(max_speed)
+	hitbox:limitHorizontalSpeed(max_speed)
+end
+function Entity:scaleHorizontalVelocity( sc,dt )
+	local hitbox = self.props.ent_hitbox
+	if not hitbox then return nil end
+	hitbox:scaleHorizontalVelocity(sc,dt)
 end
 
 local __temp_scvel_vec = {}
