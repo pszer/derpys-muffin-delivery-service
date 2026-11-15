@@ -95,7 +95,7 @@ end
 function PropDefaultObject(def, table)
 	return function(x)
 		if not x then
-			local obj = def:new(clone(table))
+			local obj = def:new(clone(table or {}))
 			return true, obj
 		else
 			return true, x

@@ -21,7 +21,7 @@ Grid.__index = Grid
 --
 --
 --
-function Grid:gridFromMesh(map_mesh)
+function Grid:gridFromMesh(map_mesh, map)
 	local w,h = map_mesh.width, map_mesh.height
 
 	local t = {}
@@ -60,6 +60,7 @@ function Grid:gridFromMesh(map_mesh)
 
 	t.tiles = tiles
 	t.__tri_table = {}
+	t.__mat_table = {}
 	setmetatable(t, Grid)
 
 	return t
@@ -69,6 +70,11 @@ function Grid:tile(x,z)
 	if x<1 or x>self.width or z<1 or z>self.height then
 		return nil end
 	return self.tiles[z][x]
+end
+
+-- TODO
+function Grid:getPhysicsMaterial(x,z)
+	return 1.0
 end
 
 function Grid:tileWorld(x,z)
@@ -100,7 +106,7 @@ end
 -- these tiles are populated inside of grid.__tri_table, and this function returns both this table
 -- as well as how many triangles there are, do not use __ipairs on the table use the index instead,
 -- the table is static and old entries remain
-function Grid:populateTilesInWorldBox(x,z,w,h)
+function Grid:populateTable_TilesInWorldBox(x,z,w,h)
 	local count = 0
 
 	for X = math.max(1,math.floor(x / TILE_SIZE)), math.min(self.width,math.ceil((x+w)/TILE_SIZE)-1) do
@@ -108,10 +114,11 @@ function Grid:populateTilesInWorldBox(x,z,w,h)
 			local tile = self:tile(X,Z)
 
 			if tile then
-			for i,tri in ipairs(tile) do
-				self.__tri_table[count+1] = tri
-				count=count+1
-			end
+				for i,tri in ipairs(tile) do
+					self.__tri_table[count+1] = tri
+					self.__mat_table[count+1] = tri
+					count=count+1
+				end
 			end
 
 		end

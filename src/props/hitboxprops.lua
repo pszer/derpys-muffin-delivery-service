@@ -4,6 +4,8 @@
 
 require "prop"
 
+require 'physicsmaterial'
+
 HitboxPropPrototype = Props:prototype{
 
 	-- prop      prop     prop default    prop input     prop      read
@@ -13,6 +15,8 @@ HitboxPropPrototype = Props:prototype{
 	{"box_velocity", "table", nil, PropDefaultTable{0,0,0}  , "hitbox velocity." },
 	{"box_rotation", "table", nil, PropDefaultTable{0,0,0, "rot"}  , "hitbox rotation. only for models." },
 	{"box_scale"   , "table", nil, PropDefaultTable{1,1,1}, "hitbox scale." },
+
+	{"box_material", "physmaterial", nil, PropDefaultObject(PhysMaterial, {})},
 
 	{"box_type", "string", nil, PropIsOneOf{'box','capsule','sphere','model'}  , "hitbox type" }, -- done
 

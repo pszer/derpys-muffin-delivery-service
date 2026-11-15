@@ -5,6 +5,7 @@ require "gameinterface"
 require 'capsule'
 require 'intersect'
 require 'grid'
+require 'physicsmaterial'
 
 local CONSTS = require 'consts'
 
@@ -13,6 +14,7 @@ Physics = {
 	epsilon = 0.000005,
 	grid_slack = TILE_SIZE/24,
 	max_iters = 16,
+	default_friction = 1.0
 }
 Physics.__index = Physics
 
@@ -47,10 +49,10 @@ function Physics:resolveHitbox(hitbox, dt, grid)
 			r=r+vz
 		end
 
-		local tiles, tiles_count, mx,mz,Mx,Mz = grid:populateTilesInWorldBox(x,z,w,r)
+		local tiles, tiles_count, mx,mz,Mx,Mz = grid:populateTable_TilesInWorldBox(x,z,w,r)
 
 		if hitbox:type() == "capsule" then
-			self:resolveCollisionsCapsule(hitbox, dt, tiles, 1,tiles_count)
+			self:resolveCollisionsCapsule(hitbox, dt, tiles, {}, 1,tiles_count)
 		else
 			error("Not implemented")
 		end
@@ -73,17 +75,16 @@ local __sweep_normal = cpml.vec3.new()
 --
 -- info contains time,depth,normal,point
 -- the triangles between min_i and max_i are tested
-function Physics:resolveCollisionsCapsule(hitbox, dt, triangles, tri_min_i, tri_max_i)
+-- if material is nil, default physics material values are used
+local default_material = PhysMaterial:new()
+function Physics:resolveCollisionsCapsule(hitbox, dt, triangles, materials, tri_min_i, tri_max_i)
 	assert(hitbox:type() == 'capsule', "Physics:resolveCollisionsCapsule() got non-capsule hitbox")
-
 	local boxprops = hitbox.props
 	local velocity = boxprops.box_velocity
+	local materials = materials or {}
 
 	local tri_min_i = tri_min_i or 1
 	local tri_max_i = tri_max_i or #triangles
-
-	--local capsule = __temp_capsule
-	--hitbox:__getTransformedCapsule(__temp_capsule)
 
 	local u = __temp_u
 	u.x,u.y,u.z = velocity[1]*dt, velocity[2]*dt, velocity[3]*dt
@@ -105,7 +106,9 @@ function Physics:resolveCollisionsCapsule(hitbox, dt, triangles, tri_min_i, tri_
 		sweep.depth  = nil
 		sweep.normal = __sweep_normal
 		sweep.point  = __sweep_point
-		sweep.winner = __sweep_normal
+		sweep.winner   = __sweep_normal
+		sweep.material = default_material
+
 		sweep.setPoint = function(v)
 			sweep.point.x=v.x
 			sweep.point.y=v.y
@@ -122,7 +125,9 @@ function Physics:resolveCollisionsCapsule(hitbox, dt, triangles, tri_min_i, tri_
 			local t0 = triangle[1]
 			local t1 = triangle[2]
 			local t2 = triangle[3]
-			Capsule:againstTriangle(sweep, boxprops.box_position, boxprops.box_capsule_height, boxprops.box_capsule_radius, u, t0,t1,t2)
+			if Capsule:againstTriangle(sweep, boxprops.box_position, boxprops.box_capsule_height, boxprops.box_capsule_radius, u, t0,t1,t2) then
+				sweep.material = materials[tri_i] or default_material -- use triangle material, or default material
+			end
 		end
 
 		-- resolve intersection

@@ -1217,7 +1217,6 @@ function Model:interpolateTwoFrames(frame1, frame2, interp, outframe)
 	prof.push("interpolatetwoframes")
 
 	local temps = self.outframes_buffer
-	local temp_mat = mat4new()
 
 	for i,pose1 in ipairs(frame1) do
 		pose2 = frame2[i]
@@ -1245,13 +1244,13 @@ function Model:getAnimationFrame(index)
 	return frame
 end
 
+local matid =
+{1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}
 function Model:getDefaultPose(outframe)
-	local id =
-	{1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}
 
 	for i=1,self:getSkeletonJointCount() do
 		for j=1,16 do
-			outframe[i][j] = id[j]
+			outframe[i][j] = matid[j]
 		end
 	end
 	return outframe
@@ -1274,7 +1273,7 @@ end
 
 -- this is for use in multi-threaded animation calculation
 -- basically the same as get getBoneMatrices, but we just return frame1, frame2, parents and the interp value so
--- all the later steps can be multi-threaded :]
+-- all the later steps can be multi-threaded
 -- returns nil,nil,nil,nil if model is not animated/default animation is used
 function Model:getAnimationFramesDataForThread(animation, frame)
 	if not self.props.model_animated then return nil, nil end
@@ -1299,7 +1298,9 @@ function Model:getAnimationFramesDataForThread(animation, frame)
 
 		local mat = mat4new(1.0)
 		for i,v in ipairs(skeleton) do
-			outframe[i] = mat
+			for j=1,16 do
+				outframe[i][j] = matid[j]
+			end
 		end
 		return outframe
 	end

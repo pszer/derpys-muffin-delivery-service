@@ -131,7 +131,7 @@ function Prov:load()
 		camcontrol:followEntityFixed(theent, {0,8.05*0,35*2}, {0.5,0.50,0.5}))	
 
 	local derpify = require 'derpify'
-	derpify(FACE_ATTRIBUTES.derpy_face, 'neutral', 'y', -0.1)
+	derpify(FACE_ATTRIBUTES.derpy_face, 'neutral', 'y', -0.4)
 
 	-- only load once
 	self.load = function() end

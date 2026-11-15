@@ -84,9 +84,9 @@ local StateWalkingPrototype = EntityStatePropPrototype:extend{
 		end
 	end },
 
-	{"state_walking_speed", "number", 195, nil,  "max walk speed, stated in world units per second"},
+	{"state_walking_speed", "number", 115, nil,  "max walk speed, stated in world units per second"},
 	{"state_walking_accel", "number", 480*2.5, nil ,  "walk speed acceleration, stated in world units per second"},
-	{"state_walking_anim_speed", "number", 3*1.25, nil,  "scalar for walk speed animation"},
+	{"state_walking_anim_speed", "number", 1.25, nil,  "scalar for walk speed animation"},
 
 	{"state_walking_deaccel", "boolean", true, nil, "deaccelerates if set to true"},
 	{"state_walking_deaccel_scale", "number", -12.5, nil, "the smaller, the faster the deacceleration"},
