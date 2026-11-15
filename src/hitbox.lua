@@ -11,12 +11,15 @@ function Hitbox:new(props)
 	}
 
 	setmetatable(this,Hitbox)
+	this.props.box_model_mat = cpml.mat4.new()
+	this.props.box_model_invmat = cpml.mat4.new()
+	this.props.box_normal_mat = cpml.mat4.new()
 	this:modelMatrix()
 	return this
 end
 
 function Hitbox:update(dt)
-	self:translatePosition(self:getVelocity(), dt)
+	--self:translatePosition(self:getVelocity(), dt)
 
 	if recalculate_bounds_flag then
 		-- TODO recalculate bounding box
@@ -43,6 +46,7 @@ local __tempnewmin = {}
 local __tempnewmax = {}
 local __temp_a = {}
 local __temp_b = {}
+local __temp_capb = {}
 function Hitbox:updateBounds()
 	if not self.recalculate_bounds_flag then return end
 
@@ -114,23 +118,20 @@ function Hitbox:updateBounds()
 		local mat = self:modelMatrix()
 
 		-- rotate the segment ab of the capsule
-		local point_a,point_b = self.props.box_capsule.a, self.props.box_capsule.b
+		local point,height,radius = self.props.box_position, self.props.box_capsule_height, self.props.box_capsule_radius
+		if radius<0 then radius=-radius end
+
 		local v_a = __temp_a 
 		local v_b = __temp_b
-		v_a[1],v_a[2],v_a[3],v_a[4] = point_a[1],point_a[2],point_a[3],1.0 
-		v_b[1],v_b[2],v_b[3],v_b[4] = point_b[1],point_b[2],point_b[3],1.0 
-		cpml.mat4.mul_vec4(v_a, mat, v_a)
-		cpml.mat4.mul_vec4(v_b, mat, v_b)
+		v_a[1],v_a[2],v_a[3],v_a[4] = point[1],point[2]-radius,point[3],1.0 
+		v_b[1],v_b[2],v_b[3],v_b[4] = point[1],point[2]-height+radius,point[3],1.0 
 
-		--min
-		props.box_bounds.min[1] = math.min(v_a[1] - props.box_sphere.radius * props.box_scale[1], v_b[1] - props.box_sphere.radius * props.box_scale[1])
-		props.box_bounds.min[2] = math.min(v_a[2] - props.box_sphere.radius * props.box_scale[2], v_b[2] - props.box_sphere.radius * props.box_scale[2])
-		props.box_bounds.min[3] = math.min(v_a[3] - props.box_sphere.radius * props.box_scale[3], v_b[3] - props.box_sphere.radius * props.box_scale[3])
-
-		--max
-		props.box_bounds.max[1] = math.max(v_a[1] + props.box_sphere.radius * props.box_scale[1], v_b[1] + props.box_sphere.radius * props.box_scale[1])
-		props.box_bounds.max[2] = math.max(v_a[2] + props.box_sphere.radius * props.box_scale[2], v_b[2] + props.box_sphere.radius * props.box_scale[2])
-		props.box_bounds.max[3] = math.max(v_a[3] + props.box_sphere.radius * props.box_scale[3], v_b[3] + props.box_sphere.radius * props.box_scale[3])
+		props.box_bounds.min[1]= point[1]-radius
+		props.box_bounds.max[1]= point[1]+radius
+		props.box_bounds.min[2]= math.min(v_a[2],v_b[2])
+		props.box_bounds.max[2]= math.max(v_a[2],v_b[2])
+		props.box_bounds.min[3]= point[3]-radius
+		props.box_bounds.max[3]= point[3]+radius
 
 	elseif self:type() == "sphere" then
 		props.max_bounds.min[1] = props.box_position[1] + props.box_sphere.a[1] - props.box_sphere.radius * props.box_scale[1]
@@ -203,8 +204,9 @@ function Hitbox:modelMatrix()
 
 	if not instance_i and self:type()=='model' then -- non-instanced model
 		self.props.box_model_mat = model:modelMatrix()
-	else
 
+	-- if model (instanced), capsule, aabb
+	else
 		local pos,rot,scale
 		local dirfix
 		if self:type()=='model' then--gpu instanced model
@@ -215,27 +217,96 @@ function Hitbox:modelMatrix()
 			pos,rot,scale = props.box_position,props.box_rotation,props.box_scale
 		end
 
-		local mat = cpml.mat4.new()
+		local mat = props.box_model_mat
 		for i=1,16 do mat[i]=id[i] end
 
 		local vec3 = cpml.vec3.new(scale)
 		cpml.mat4.scale(mat, mat, vec3)
-		rotateMatrix(mat,rot)
+
+		-- rotations only avaiable for model mesh hitboxes
+		if self:type()=='model' then 
+			rotateMatrix(mat,rot)
+		end
+
 		vec3 = cpml.vec3.new(pos)
 		cpml.mat4.translate(mat, mat, vec3)
 		if dirfix then
 			mat = cpml.mat.mul(mat, mat, dirfix)
 		end
 
-		local norm_m = cpml.mat4.new()
+		local norm_m = props.box_normal_mat
 		norm_m = norm_m:invert(mat)
+		for i=1,16 do
+			props.box_model_invmat[i] = norm_m[i]
+		end
 		norm_m = norm_m:transpose(norm_m)
-
-		self.props.box_model_mat  = mat
-		self.props.box_normal_mat = norm_m
 	end
 	return self.props.box_model_mat, self.props.box_normal_mat
 end
+
+--[[local __temp_cap_a = {0,0,0,1}
+local __temp_cap_b = {0,0,0,1}
+local __temp_cap_c = {0,0,0,1}
+local __temp_out_a = {0,0,0}
+local __temp_out_b = {0,0,0}
+local __temp_out_capsule = {}
+-- writes capsule spec post-transformation to the out table 
+-- for internal calculations only, the info provided is stored
+-- in the above temporary registers to avoid garbage collection
+function Hitbox:__getTransformedCapsule(out, matrix)
+	local matrix = matrix or self:modelMatrix()
+	local props = self.props
+	local mul_vec4 = cpml.mat4.mul_vec4
+
+	if props.box_type~="capsule" then
+		error("Hitbox:getTransformedCapsule(): not a capsule.")
+	end
+
+	local capsule = props.box_capsule
+	local a,b,c = __temp_cap_a, __temp_cap_b, __temp_cap_c
+
+	a[1],a[2],a[3],a[4] = capsule.a[1],capsule.a[2],capsule.a[3], 1.0
+	b[1],b[2],b[3],b[4] = capsule.b[1],capsule.b[2],capsule.b[3], 1.0
+	-- c is used to determine the new radius post-transformation
+	c[1],c[2],c[3],c[4] = capsule.a[1],capsule.a[2],capsule.a[3]+capsule.radius, 1.0
+
+	mul_vec4(a, matrix, a)
+	mul_vec4(b, matrix, b)
+	mul_vec4(c, matrix, c)
+
+	local dx = c[1]-a[1]
+	local dy = c[2]-a[2]
+	local dz = c[3]-a[3]
+
+	local out_a = __temp_out_a
+	local out_b = __temp_out_b
+	out_a[1], out_a[2], out_a[3] = a[1],a[2],a[3]
+	out_b[1], out_b[2], out_b[3] = b[1],b[2],b[3]
+
+	local new_radius = math.sqrt(dx*dx+dy*dy+dz*dz)
+
+	out.a      = out_a
+	out.b      = out_b
+	out.radius = new_radius
+	return out
+end
+function Hitbox:__untransformCapsule(new_a,new_b)
+	local a = __temp_cap_a
+	local b = __temp_cap_a
+
+	a[1],a[2],a[3],a[4] = new_a[1],new_a[2],new_a[3],1
+	b[1],b[2],b[3],b[4] = new_b[1],new_b[2],new_b[3],1
+	cpml.mat4.mul_vec4(a, self.props.box_model_invmat, a)
+	cpml.mat4.mul_vec4(b, self.props.box_model_invmat, b)
+
+	--self.props.box_capsule.a[1] = a[1]
+	--self.props.box_capsule.a[2] = a[2]
+	--self.props.box_capsule.a[3] = a[3]
+	--
+	--self.props.box_capsule.b[1] = b[1]
+	--self.props.box_capsule.b[2] = b[2]
+	--self.props.box_capsule.b[3] = b[3]
+end--]]
 
 function Hitbox:areBoundsChanged()
 	return self.recalculate_bounds_flag
@@ -268,8 +339,17 @@ function Hitbox:getBounds()
 	return self.props.box_bounds.min, self.props.box_bounds.max
 end
 
-function Hitbox:setVelocity(vel)
+function Hitbox:setVelocity(vel,y,z)
 	local v = self.props.box_velocity
+	if y then
+		if vel~=v[1]or y~=v[2] or z~=v[3] then
+			self.props.box_velocity[1] = vel
+			self.props.box_velocity[2] = y
+			self.props.box_velocity[3] = z
+		end
+		return
+	end
+
 	if vel[1]~=v[1]or vel[2]~=v[2] or vel[3]~=v[3] then
 		self.props.box_velocity[1] = vel[1]
 		self.props.box_velocity[2] = vel[2]
@@ -354,6 +434,7 @@ function Hitbox:translatePosition(vec, dt)
 		v[3]+vec[3]*dt
 	}
 	self:setPosition(new_pos)
+	self:moved()
 end
 
 function Hitbox:testBoundsAgainst(hitbox2)

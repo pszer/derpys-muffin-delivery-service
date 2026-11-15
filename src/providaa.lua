@@ -116,7 +116,7 @@ function Prov:load()
 	GameData:setupFromProv(self)
 
 	local playerproto  = require "ent.player"
-	theent = self:addEntityFromPrototype(playerproto, {ent_rotation = {0.0,0.0,1.0,"dir"}, ent_position = {250,-20,1500}})
+	theent = self:addEntityFromPrototype(playerproto, {ent_rotation = {0.0,0.0,1.0,"dir"}, ent_position = {0,-20,0}})
 	theent:enableStateByName("state_walking")
 
 	local hemisphere = Model:fromLoader("Hemisphere.iqm")
@@ -150,16 +150,6 @@ function Prov:update(dt)
 		self:onTickChange()
 	end
 
-	local hb = theent:getHitbox()
-	local pos,a,b,rad = hb.props.box_position, hb.props.box_capsule.a, hb.props.box_capsule.b, hb.props.box_capsule.radius
-
-	hemisphere1:setScale{rad,rad,rad}
-	hemisphere1:setPosition{pos[1]+a[1],pos[2]+a[2],pos[3]+a[3]}
-	hemisphere2:setScale{rad,rad,rad}
-	hemisphere2:setPosition{pos[1]+b[1],pos[2]+b[2],pos[3]+b[3]}
-	hemisphere1:setRotation{math.pi,0,0,'rot'}
-	hemisphere2:setRotation{0,0,0,'rot'}
-
 	if scancodeIsDown("p", CTRL.GAME) then
 		self.scene:__removeAllModels()
 		Models.releaseModelsOutsideSet({})
@@ -171,9 +161,25 @@ function Prov:update(dt)
 	self:pollInputHandlers()
 	prof.pop("pollinputhandlers")
 
+	prof.push("physics")
+	Physics:resolveHitbox(theent:getHitbox(), dt, self.grid)
+	prof.pop("physics")
+
 	prof.push("update_ents")
 	self:updateEnts(dt)
 	prof.pop("update_ents")
+
+	local hb = theent:getHitbox()
+	local pos,height,rad = hb.props.box_position, hb.props.box_capsule_height, hb.props.box_capsule_radius
+
+	print(pos[1],pos[2],pos[3])
+
+	hemisphere1:setScale{rad*2,rad*2,rad*2}	
+	hemisphere1:setPosition{pos[1],pos[2]-rad,pos[3]}
+	hemisphere2:setScale{rad*2,rad*2,rad*2}
+	hemisphere2:setPosition{pos[1],pos[2]-height+rad,pos[3]}
+	hemisphere1:setRotation{math.pi,0,0,'rot'}
+	hemisphere2:setRotation{0,0,0,'rot'}
 
 	self.scene:updateModelMatrices()
 

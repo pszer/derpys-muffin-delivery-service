@@ -38,8 +38,12 @@ function Grid:gridFromMesh(map_mesh)
 		for x=1, w do
 			Z_t[x] = { tile={ Grid:getTileTriangles(map_mesh,x,z)}, walls={} }
 
-			Z_t[x][1] = Z_t[x].tile[1]
-			Z_t[x][2] = Z_t[x].tile[2]
+			if Z_t[x].tile[1] then
+				Z_t[x][1] = Z_t[x].tile[1]
+			end
+			if Z_t[x].tile[2] then
+				Z_t[x][2] = Z_t[x].tile[2]
+			end
 
 			for i=1,5 do
 				Z_t[x].walls[i] = { Grid:getWallVerts(map_mesh,x,z,i) }
@@ -55,6 +59,7 @@ function Grid:gridFromMesh(map_mesh)
 	end
 
 	t.tiles = tiles
+	t.__tri_table = {}
 	setmetatable(t, Grid)
 
 	return t
@@ -73,20 +78,64 @@ function Grid:tileWorld(x,z)
 end
 
 -- gets tiles that are inside of a given box of width w across the x-axis and h across the z-axis
+-- these tiles are populated inside of grid.__tri_table, and this function returns both this table
+-- as well as how many triangles there are, do not use __ipairs on the table use the index instead,
+-- the table is static and old entries remain
 function Grid:tilesInWorldBox(x,z,w,h)
 	local tiles = {}
 
-	for X = math.max(1,math.floor(x / TILE_SIZE)), math.min(self.width,math.ceil((x+w)/TILE_SIZE))-1 do
-		for Z = math.max(1,math.floor(z / TILE_SIZE)), math.min(self.height,math.ceil((z+h)/TILE_SIZE))-1 do
+	for X = math.max(1,math.floor(x / TILE_SIZE)), math.min(self.width,math.ceil((x+w)/TILE_SIZE)-1) do
+		for Z = math.max(1,math.floor(z / TILE_SIZE)), math.min(self.height,math.ceil((z+h)/TILE_SIZE)-1) do
 
 			print(X,Z)
 
 			local tile = self:tile(X,Z)
-			if tile then table.insert(tiles,tile) end
+			if tile then
+				table.insert(tiles,tile)
+			end
 
 		end
 	end
 	return tiles
+end
+
+-- gets tiles that are inside of a given box of width w across the x-axis and h across the z-axis
+-- these tiles are populated inside of grid.__tri_table, and this function returns both this table
+-- as well as how many triangles there are, do not use __ipairs on the table use the index instead,
+-- the table is static and old entries remain
+function Grid:populateTilesInWorldBox(x,z,w,h)
+	local count = 0
+
+	for X = math.max(1,math.floor(x / TILE_SIZE)), math.min(self.width,math.ceil((x+w)/TILE_SIZE)-1) do
+		for Z = math.max(1,math.floor(z / TILE_SIZE)), math.min(self.height,math.ceil((z+h)/TILE_SIZE)-1) do
+
+			print("mi bombo")
+			print(X,Z)
+
+			local tile = self:tile(X,Z)
+
+			if tile then
+			for i,tri in ipairs(tile) do
+				self.__tri_table[count+1] = tri
+				count=count+1
+			end
+			end
+
+		end
+	end
+	local a,b,c,d = self:tilesInWorldBoxIndices(x,z,w,h)
+	return self.__tri_table, count,a,b,c,d
+end
+
+-- returns min_x, min_z, max_x, max_z
+function Grid:tilesInWorldBoxIndices(x,z,w,h)
+	local min_x,max_x = math.max(1,math.floor(x / TILE_SIZE)), math.min(self.width ,math.ceil((x+w)/TILE_SIZE)-1)
+	local min_z,max_z = math.max(1,math.floor(z / TILE_SIZE)), math.min(self.height,math.ceil((z+h)/TILE_SIZE)-1)
+
+	if max_x >= min_x and max_z >= min_z then
+		return min_x, min_z, max_x, max_z
+	end
+	return nil
 end
 
 function Grid:tilesInWorldSphere(x,z,r)
