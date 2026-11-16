@@ -14,7 +14,7 @@ local EntityPlayerPrototype = EntityPropPrototype:extend{
 	{"ent_model_inherit" , "boolean", true, nil},
 
 	{"ent_hitbox" , "hitbox", nil,
-		PropDefaultObject(Hitbox,{ box_position={0,0,0}, box_type="capsule", box_capsule_height=28, box_capsule_radius=6})},
+		PropDefaultObject(Hitbox,{ box_position={0,0,0}, box_type="capsule", box_apply_movement_rules=true, box_capsule_height=28, box_capsule_radius=6})},
 
 	--{"ent_hitbox_position", "table", nil, PropDefaultTable{-5,-32,-5}, "entity's hitbox position, local to ent_position"},
 	--{"ent_hitbox_size", "table", nil, PropDefaultTable{10,32,10}, "entity's hitbox size, local to ent_position"},

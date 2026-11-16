@@ -119,12 +119,12 @@ function Prov:load()
 	theent = self:addEntityFromPrototype(playerproto, {ent_rotation = {0.0,0.0,1.0,"dir"}, ent_position = {128,-250,128}})
 	theent:enableStateByName("state_walking")
 
-	local hemisphere = Model:fromLoader("Hemisphere.iqm")
-	hemisphere1 = ModelInstance:newInstance(hemisphere)
-	hemisphere2 = ModelInstance:newInstance(hemisphere)
+	--local hemisphere = Model:fromLoader("Hemisphere.iqm")
+	--hemisphere1 = ModelInstance:newInstance(hemisphere)
+	--hemisphere2 = ModelInstance:newInstance(hemisphere)
 
-	self.scene:addModelInstance(hemisphere1)
-	self.scene:addModelInstance(hemisphere2)
+	--self.scene:addModelInstance(hemisphere1)
+	--self.scene:addModelInstance(hemisphere2)
 
 	local cam = self.scene:getCamera()
 	cam:setController(
@@ -162,23 +162,24 @@ function Prov:update(dt)
 	prof.pop("pollinputhandlers")
 
 	local hb = theent:getHitbox()
-	hb.props.box_velocity[2] = hb.props.box_velocity[2] + 1200*dt
+	--hb.props.box_velocity[2] = hb.props.box_velocity[2] + 1200*dt
 
 	if love.keyboard.isDown('space') then
-		hb.props.box_velocity[2] = -400
+		hb.props.box_velocity[2] = -150
 	end
 
 	self:updateEntsLogic()
 
 	prof.push("physics")
-	Physics:resolveHitbox(theent:getHitbox(), dt, self.grid)
+	--Physics:resolveHitbox(theent:getHitbox(), dt, self.grid)
+	Physics:update(dt, self:getEntities(), nil, nil, self.grid)
 	prof.pop("physics")
 
 	prof.push("update_ents")
 	self:updateEnts(dt)
 	prof.pop("update_ents")
 
-	local hb = theent:getHitbox()
+	--[[local hb = theent:getHitbox()
 	local pos,height,rad = hb.props.box_position, hb.props.box_capsule_height, hb.props.box_capsule_radius
 
 	hemisphere1:setScale{rad*2,rad*2,rad*2}	
@@ -186,7 +187,7 @@ function Prov:update(dt)
 	hemisphere2:setScale{rad*2,rad*2,rad*2}
 	hemisphere2:setPosition{pos[1],pos[2]-height+rad,pos[3]}
 	hemisphere1:setRotation{math.pi,0,0,'rot'}
-	hemisphere2:setRotation{0,0,0,'rot'}
+	hemisphere2:setRotation{0,0,0,'rot'}--]]
 
 	self.scene:updateModelMatrices()
 

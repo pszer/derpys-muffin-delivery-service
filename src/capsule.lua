@@ -232,7 +232,8 @@ function Capsule:againstTriangle(out, pos,height,radius, vel, _t0,_t1,_t2)
 		triangle_normals[i].y = n.y
 		triangle_normals[i].z = n.z
 
-		hit = hit or Intersect.sweepSphereTrianglePlane(out, c0, radius, velocity, p0,p1,p2, n)
+		local H = Intersect.sweepSphereTrianglePlane(out, c0, radius, velocity, p0,p1,p2, n)
+		hit = hit or H
 	end
 
 	-- Sphere sweep parallelogram tests
@@ -277,7 +278,8 @@ function Capsule:againstTriangle(out, pos,height,radius, vel, _t0,_t1,_t2)
 			parallelogram_normals[i].y = n.y
 			parallelogram_normals[i].z = n.z
 
-			hit = hit or Intersect.sweepSphereParallelogramPlane(out, c0, radius, velocity, p0,p1,p2, n)
+			local H = Intersect.sweepSphereParallelogramPlane(out, c0, radius, velocity, p0,p1,p2, n)
+			hit = hit or H
 		end
 	end
 
@@ -292,17 +294,17 @@ function Capsule:againstTriangle(out, pos,height,radius, vel, _t0,_t1,_t2)
 		else
 			n = parallelogram_normals[ i-6 ]
 		end
-		assert(n)
-	
-		hit = hit or Intersect.sweepPointUncappedCylinder(out, c0, velocity, p0,p1,radius, n)
+
+		local H = Intersect.sweepPointUncappedCylinder(out, c0, velocity, p0,p1,radius, n)
+		hit = hit or H
 	end
 
 	-- Do point-sphere sweep tests
 	for i=1,6 do
 		local c = spheres[i]
 		local n = triangle_normals[ math.floor((i-1)/3) + 1]
-		assert(n)
-		hit = hit or Intersect.sweepPointSphere(out, c0, velocity, c, radius, n)
+		local H = Intersect.sweepPointSphere(out, c0, velocity, c, radius, n)
+		hit = hit or H
 	end
 
 	return hit

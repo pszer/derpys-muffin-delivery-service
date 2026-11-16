@@ -139,6 +139,12 @@ function Entity:getApproximateSpeed()
 	return abs(vel[1]) + abs(vel[2]) + abs(vel[3])
 end
 
+-- horizontal in this case means xz direction
+function Entity:getHorizontalSpeed()
+	local hitbox = self.props.ent_hitbox
+	if not hitbox then return nil end
+	return hitbox:getHorizontalSpeed()
+end
 function Entity:limitHorizontalSpeed( max_speed )
 	local hitbox = self.props.ent_hitbox
 	if not hitbox then return nil end
@@ -165,6 +171,8 @@ function Entity:getModel()
 	return self.props.ent_model end
 function Entity:getIdentifier()
 	return self.props.ent_identifier end
+function Entity:isStatic()
+	return self.props.ent_static == true end
 
 function Entity:setVelocity(vel)
 	local hitbox = self.props.ent_hitbox

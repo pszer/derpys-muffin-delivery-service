@@ -11,7 +11,7 @@ PhysMaterialPropPrototype = Props:prototype{
 	--
 
 	{"mat_solid"   , "boolean", true , nil         , "whether material is solid/non-solid"},
-	{"mat_friction", "number" , 1.0  , PropMin(0.0), "materials friction"},
+	{"mat_friction", "number" , 0.30  , PropMin(0.0), "materials friction"},
 	{"mat_bounce"  , "number" , 0.0  , PropMin(0.0), "materials bounce"},
 
 }

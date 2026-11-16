@@ -40,4 +40,19 @@ HitboxPropPrototype = Props:prototype{
 
 	{"box_static", "boolean", false, nil, "if true the entity's bounds are calculated once, and velocity is always zero."},
 
+	{"box_grounded", "boolean", false, nil, "is the hitbox touching a ground plane last frame."},
+	{"box_ceiling" , "boolean", false, nil, "is the hitbox touching a ceiling plane last frame."},
+	{"box_wall"    , "boolean", false, nil, "is the hitbox touching a wall plane last frame."},
+
+	{"box_ground_normal" , "table", nil, PropDefaultTable{0,-1,0}, "(when box_grounded is true) normal vector of ground plane."},
+	{"box_ceiling_normal", "table", nil, PropDefaultTable{0, 1,0}, "(when box_ceiling is true) normal vector of ceiling plane."},
+	{"box_wall_normal"   , "table", nil, PropDefaultTable{0 ,0,1}, "(when box_wall is true) normal vector of wall plane."},
+
+	{"box_ground_angle", "number", 60, nil, "maximum angle that counts as the ground"},
+	{"box_ceiling_angle",  "number", 30, nil, "maximum angle that counts as the ground"},
+	{"box_wall_angle",     "number", 45, nil, "maximum angle that counts as the ground"},
+
+	{"box_apply_movement_rules", "boolean", false, nil, [[if true, player movement rules are applied to this hitbox. this includes
+	calculating box_grounded etc. and changing gravity on slopes.]]}
+
 }

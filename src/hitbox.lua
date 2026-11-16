@@ -22,7 +22,16 @@ function Hitbox:update(dt)
 	--self:translatePosition(self:getVelocity(), dt)
 	if self.recalculate_bounds_flag then
 		-- TODO recalculate bounding box
+		self:updateBounds()
 		self.recalculate_bounds_flag = false
+	end
+end
+
+function Hitbox:resetFlags()
+	if self.props.box_apply_movement_rules then
+		self.props.box_grounded = false
+		self.props.box_ceiling  = false
+		self.props.box_wall     = false
 	end
 end
 
@@ -239,70 +248,6 @@ function Hitbox:modelMatrix()
 	return self.props.box_model_mat, self.props.box_normal_mat
 end
 
---[[local __temp_cap_a = {0,0,0,1}
-local __temp_cap_b = {0,0,0,1}
-local __temp_cap_c = {0,0,0,1}
-local __temp_out_a = {0,0,0}
-local __temp_out_b = {0,0,0}
-local __temp_out_capsule = {}
--- writes capsule spec post-transformation to the out table 
--- for internal calculations only, the info provided is stored
--- in the above temporary registers to avoid garbage collection
-function Hitbox:__getTransformedCapsule(out, matrix)
-	local matrix = matrix or self:modelMatrix()
-	local props = self.props
-	local mul_vec4 = cpml.mat4.mul_vec4
-
-	if props.box_type~="capsule" then
-		error("Hitbox:getTransformedCapsule(): not a capsule.")
-	end
-
-	local capsule = props.box_capsule
-	local a,b,c = __temp_cap_a, __temp_cap_b, __temp_cap_c
-
-	a[1],a[2],a[3],a[4] = capsule.a[1],capsule.a[2],capsule.a[3], 1.0
-	b[1],b[2],b[3],b[4] = capsule.b[1],capsule.b[2],capsule.b[3], 1.0
-	-- c is used to determine the new radius post-transformation
-	c[1],c[2],c[3],c[4] = capsule.a[1],capsule.a[2],capsule.a[3]+capsule.radius, 1.0
-
-	mul_vec4(a, matrix, a)
-	mul_vec4(b, matrix, b)
-	mul_vec4(c, matrix, c)
-
-	local dx = c[1]-a[1]
-	local dy = c[2]-a[2]
-	local dz = c[3]-a[3]
-
-	local out_a = __temp_out_a
-	local out_b = __temp_out_b
-	out_a[1], out_a[2], out_a[3] = a[1],a[2],a[3]
-	out_b[1], out_b[2], out_b[3] = b[1],b[2],b[3]
-
-	local new_radius = math.sqrt(dx*dx+dy*dy+dz*dz)
-
-	out.a      = out_a
-	out.b      = out_b
-	out.radius = new_radius
-	return out
-end
-function Hitbox:__untransformCapsule(new_a,new_b)
-	local a = __temp_cap_a
-	local b = __temp_cap_a
-
-	a[1],a[2],a[3],a[4] = new_a[1],new_a[2],new_a[3],1
-	b[1],b[2],b[3],b[4] = new_b[1],new_b[2],new_b[3],1
-	cpml.mat4.mul_vec4(a, self.props.box_model_invmat, a)
-	cpml.mat4.mul_vec4(b, self.props.box_model_invmat, b)
-
-	--self.props.box_capsule.a[1] = a[1]
-	--self.props.box_capsule.a[2] = a[2]
-	--self.props.box_capsule.a[3] = a[3]
-	--
-	--self.props.box_capsule.b[1] = b[1]
-	--self.props.box_capsule.b[2] = b[2]
-	--self.props.box_capsule.b[3] = b[3]
-end--]]
-
 function Hitbox:areBoundsChanged()
 	return self.recalculate_bounds_flag
 end
@@ -329,6 +274,10 @@ function Hitbox:getVelocity()
 function Hitbox:getSpeed()
 	local vel = self:getVelocity()
 	return math.sqrt(vel[1]*vel[1] + vel[2]*vel[2] + vel[3]*vel[3])
+end
+function Hitbox:getHorizontalSpeed()
+	local vel = self:getVelocity()
+	return math.sqrt(vel[1]*vel[1] + vel[3]*vel[3])
 end
 function Hitbox:getBounds()
 	return self.props.box_bounds.min, self.props.box_bounds.max
@@ -440,6 +389,10 @@ function Hitbox:translatePosition(vec, dt)
 	new_pos[3] = v[3] + vec[3]*dt
 	self:setPosition(new_pos)
 	self:moved()
+end
+
+function Hitbox:isStatic()
+	return self.props.box_static == true 
 end
 
 function Hitbox:testBoundsAgainst(hitbox2)

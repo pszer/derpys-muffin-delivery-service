@@ -348,18 +348,19 @@ function Intersect.sweepPointSphere(sweep, p, v, s, r, fallback_normal)
 	if c>0 and b>0 then -- point starts outside sphere and moves away
 		return false end
 
-	local a = dot(v,v)
-	local discr = b*b - a*c
-	if discr < 0 then
-		return false -- point misses sphere
-	end
-
-	-- find time of contact
 	local t
-	if a > 0 then
-		t = (-b - math.sqrt(discr))/a
-	else
+	local a = dot(v,v)
+
+	if a < Physics.epsilon then -- no motion
+		if c > 0 then return false end
 		t = 0
+	else
+		local discr = b*b - a*c
+		if discr < 0 then
+			return false -- point misses sphere
+		end
+		-- find time of contact
+		t = (-b - math.sqrt(discr))/a
 	end
 
 	-- ignore if different collision is sooner
