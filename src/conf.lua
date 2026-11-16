@@ -1,5 +1,5 @@
 function love.conf(t)
-    t.identity = "providaa"               -- The name of the save directory (string)
+    t.identity = "DerpyMuffinDeliveryService"               -- The name of the save directory (string)
     t.appendidentity = false            -- Search files in source directory before save directory (boolean)
     t.version = "11.4"                  -- The LÖVE version this game was made for (string)
     t.console = false                   -- Attach a console (boolean, Windows only)
@@ -10,7 +10,7 @@ function love.conf(t)
     t.audio.mic = false                 -- Request and use microphone capabilities in Android (boolean)
     t.audio.mixwithsystem = true        -- Keep background music playing when opening LOVE (boolean, iOS and Android only)
 
-    t.window.title = "Providaa"         -- The window title (string)
+    t.window.title = "Derpy Hooves Muffin Delivery Service!"         -- The window title (string)
     t.window.icon = nil                 -- Filepath to an image to use as the window's icon (string)
     t.window.width = 1366                -- The window width (number~
     t.window.height = 768               -- The window height (number)
