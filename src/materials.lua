@@ -153,14 +153,14 @@ function Material:send(shader, limit_to)
 			local params  = mat[2]
 
 			shadersend(shader, u_shader_tex_name, texture)
-			shadersend(shader, u_shader_tex_name.."Exists", true)
+			shadersend(shader, u_shader_tex_name.."Exists", 1.0)
 			for uniform,value in pairs(params) do
 				shadersend(shader, uniform, value)
 			end
 		else
 			local default_texture = mat_def.default
 			shadersend(shader, u_shader_tex_name, default_texture)
-			shadersend(shader, u_shader_tex_name.."Exists", false)
+			shadersend(shader, u_shader_tex_name.."Exists", 0.0)
 			for uniform,value in pairs(mat_def.parameters) do
 				shadersend(shader, uniform, value)
 			end

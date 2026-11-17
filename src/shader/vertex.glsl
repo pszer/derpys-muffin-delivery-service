@@ -209,9 +209,9 @@ uniform vec4 u_contour_colour;
 
 // material info
 uniform Image MatNormal;
-uniform bool MatNormalExists;
+uniform float MatNormalExists;
 uniform Image MatEmission;
-uniform bool MatEmissionExists;
+uniform float MatEmissionExists;
 
 uniform float u_rimlight;
 
@@ -558,6 +558,11 @@ void effect( ) {
 		return;
 	}
 
+	vec4 texcolor;
+	texcolor = get_tex_colour(MainTex, VaryingTexCoord.xy);
+
+	if (texcolor.a == 0.0) discard;
+
 	float dist = (frag_position.z*frag_position.z) + (frag_position.x*frag_position.x) + (frag_position.y*frag_position.y);
 	dist = sqrt(dist);
 
@@ -565,16 +570,19 @@ void effect( ) {
 	fog_r = clamp(fog_r, 0.0,1.0);
 
 	// normal bump-mapping
-	vec3 normal;
+	vec3 normal = frag_normal;
+	//vec3 normal_map;
 	//if (u_bumpmap_enable) {
-	if (MatNormalExists) {
+	//if (MatNormalExists == 1.0) {
 		normal = texture2D(MatNormal, calc_tex_coords(VaryingTexCoord.xy)).xyz;
 		normal = (normal-vec3(0.5)) * 2.0;
 		normal = normalize(TBN_mat * normal);
 		//normal = frag_normal;
-	} else {
-		normal = frag_normal;
-	}
+	//} else {
+	//	normal = frag_normal;
+	//}
+	// if no normal map is present, then
+	
 
 	vec3 light = ambient_lighting( ambient_col );
 	vec3 dir_light_result = calc_dir_light_col(dir_frag_light_pos, dir_static_frag_light_pos, u_dir_lightspace, u_dir_static_lightspace,
@@ -597,8 +605,6 @@ void effect( ) {
 	DO_POINT_LIGHT(7);
 	DO_POINT_LIGHT(8);
 
-	vec4 texcolor;
-	texcolor = get_tex_colour(MainTex, VaryingTexCoord.xy);
 	vec4 pix = texcolor * vec4(light,1.0);
 
 	/*float rim_light = dot(frag_normal, -normalize(frag_w_position - view_pos));

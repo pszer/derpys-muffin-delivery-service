@@ -62,13 +62,15 @@ end
 
 function MapDecal:generateMesh(mode)
 	local mode = mode or "dynamic"
+	local attachTangent = require 'tangent'
+	-- TODO tangents for dynamic decals
 	if not self.mesh then
 		local verts = self.verts
 		if #verts == 0 then
 			verts = {
-				{0,0,0,0,0,0,0,0},
-				{0,0,0,0,0,0,0,0},
-				{0,0,0,0,0,0,0,0},
+				{0,0,0, 0,0, 0,0,0},
+				{0,0,0, 0,0, 0,0,0},
+				{0,0,0, 0,0, 0,0,0},
 			}
 			local m = love.graphics.newMesh(MapMesh.atypes, verts, "triangles", mode)
 			self.mesh=m

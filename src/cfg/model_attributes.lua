@@ -16,6 +16,10 @@ local MODEL_ATTRIBUTES = {
 		["model_vertex_winding"] = "cw"
 	},
 
+	["house1.iqm"] = {
+		["model_texture_fname"]  = "models/house1.png",
+		["model_vertex_winding"] = "cw"
+	},
 	["Sphere.iqm"] = {
 		["model_texture_fname"]  = "blue.png",
 		["model_vertex_winding"] = "cw"
@@ -24,8 +28,8 @@ local MODEL_ATTRIBUTES = {
 		["model_texture_fname"]  = "Transparent.png",
 		["model_vertex_winding"] = "cw"
 	},
-	["shittycrate.iqm"] = {
-		["model_texture_fname"]  = "models/shittycrate.png",
+	["crate.iqm"] = {
+		["model_texture_fname"]  = "models/crate.png",
 		["model_vertex_winding"] = "cw"
 	},
 	["mapedit/nito.iqm"] = {

@@ -109,7 +109,7 @@ FACE_DECOR_ATTRIBUTES = {
 		decor_name = "face",
 		decor_model_name = "pony/derpyfacemesh.iqm",
 		decor_parent_bone = "Head",
-		decor_position = {0,0,0.015},
+		decor_position = {0,0,0.035},
 		decor_shadow_mult = 1.00
 	}
 }

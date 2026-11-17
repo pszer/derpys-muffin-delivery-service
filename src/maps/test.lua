@@ -899,15 +899,16 @@ return {
 	},
 
 	models = {
-		{name="shittycrate.iqm", pos={8,1,62}},
-		{name="shittycrate.iqm", pos={1,1,62}},
-		{name="shittycrate.iqm", pos={6,3,62}},
+		{name="crate.iqm", pos={8,1,62}},
+		{name="crate.iqm", pos={1,1,62}},
+		{name="crate.iqm", pos={6,3,62}},
 		{name="pony/derpy.iqm", pos={6,3,58}},
+		{name="house1.iqm", pos={8,1,50}},
 	},
 
 	skybox = {
 		texture = "skyday01.png",
-		brightness = 15.0
+		brightness = 10.0
 	},
 
 	groups = {
@@ -923,7 +924,7 @@ return {
 		{
 			["light_pos"] = {0,0,0,0},
 			["light_dir"] = {-0.8,2.7,-1.5},
-			["light_col"] = {277.95/255, 277.95/255, 242/255, 25.0},
+			["light_col"] = {277.95/255, 300.95/255, 230/255, 14.0},
 			["light_static"] = true
 		},
 

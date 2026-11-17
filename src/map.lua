@@ -749,6 +749,9 @@ function Map.internalGenerateDecalsStatic(map, map_verts, vert_index_map, wall_i
 		attr = love.graphics.newMesh(MapMesh.decal_atts_atypes, {{-1},{-1},{-1}}, "triangles", "static")
 	end
 
+	local attachTangent = require 'tangent'
+	attachTangent(mesh)
+
 	return mesh, atlas, atlas_uvs
 end
 

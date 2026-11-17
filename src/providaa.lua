@@ -116,7 +116,7 @@ function Prov:load()
 	GameData:setupFromProv(self)
 
 	local playerproto  = require "ent.player"
-	theent = self:addEntityFromPrototype(playerproto, {ent_rotation = {0.0,0.0,1.0,"dir"}, ent_position = {128,-250,128}})
+	theent = self:addEntityFromPrototype(playerproto, {ent_rotation = {0.0,0.0,1.0,"dir"}, ent_position = {128,-250,1500}})
 	theent:enableStateByName("state_walking")
 
 	--local hemisphere = Model:fromLoader("Hemisphere.iqm")
@@ -128,10 +128,10 @@ function Prov:load()
 
 	local cam = self.scene:getCamera()
 	cam:setController(
-		camcontrol:followEntityFixed(theent, {0,8.05*0,35*2}, {0.5,0.50,0.5}))	
+		camcontrol:followEntityFixed(theent, {0,8.05*0,35*3}, {0.5,0.50,0.5}))	
 
 	local derpify = require 'derpify'
-	derpify(FACE_ATTRIBUTES.derpy_face, 'neutral', 'y', -0.4)
+	derpify(FACE_ATTRIBUTES.derpy_face, 'neutral', 'y', -0.2)
 
 	-- only load once
 	self.load = function() end
@@ -162,7 +162,6 @@ function Prov:update(dt)
 	prof.pop("pollinputhandlers")
 
 	local hb = theent:getHitbox()
-	--hb.props.box_velocity[2] = hb.props.box_velocity[2] + 1200*dt
 
 	if love.keyboard.isDown('space') then
 		hb.props.box_velocity[2] = -150
@@ -171,7 +170,6 @@ function Prov:update(dt)
 	self:updateEntsLogic()
 
 	prof.push("physics")
-	--Physics:resolveHitbox(theent:getHitbox(), dt, self.grid)
 	Physics:update(dt, self:getEntities(), nil, nil, self.grid)
 	prof.pop("physics")
 
